@@ -9,12 +9,21 @@
 from typing import Union
 
 from PySide6.QtCore import QUrl, QPoint
+from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon, QGuiApplication, QDesktopServices
 
 from conf.app_info import AppInfo
 
 
 class Gui:
+    @staticmethod
+    def app():
+        return QApplication.instance()
+
+    @staticmethod
+    def beep():
+        Gui.app().beep()
+
     @staticmethod
     def icon(path: str):
         return QIcon(path)

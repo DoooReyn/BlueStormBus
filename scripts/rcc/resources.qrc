@@ -1,9 +1,9 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-    <qresource prefix="ICON">
-        <file alias="APP">../../resources/icon/app.ico</file>
+    <qresource prefix="icon">
+        <file alias="app">../../resources/icon/app.ico</file>
     </qresource>
-    <qresource prefix="THEME">
-        <file alias="DEFAULT">../../resources/theme/default.qss</file>
+    <qresource prefix="theme">
+        <file alias="default">../../resources/theme/default.qss</file>
     </qresource>
 </RCC>

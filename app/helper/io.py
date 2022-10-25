@@ -45,10 +45,9 @@ class IO:
     @staticmethod
     def read(filepath: str, encoding='utf-8'):
         """向文件读取数据"""
-        if exists(filepath) and isfile(filepath):
-            file_handle = QFile(filepath)
-            if file_handle.open(QIODevice.ReadOnly):
-                return file_handle.readAll().data().decode(encoding=encoding)
+        file_handle = QFile(filepath)
+        if file_handle.open(QIODevice.ReadOnly):
+            return file_handle.readAll().data().decode(encoding=encoding)
 
     @staticmethod
     def write(where: str, content: str, encoding='utf-8'):

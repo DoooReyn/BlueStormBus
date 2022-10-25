@@ -23,5 +23,11 @@ class Signals(QObject):
     ViewFocusIn = Signal(str)
     ViewFocusOut = Signal(str)
 
+    LogDebug = Signal(str)
+    LogInfo = Signal(str)
+    LogWarn = Signal(str)
+    LogError = Signal(str)
+    LogFatal = Signal(str)
+
 
 gSignals = Signals()

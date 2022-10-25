@@ -1,3 +1,3 @@
 class ResMap:
-    ICON_APP = ":ICON/APP"
-    THEME_DEFAULT = ":THEME/DEFAULT"
+    ICON_APP = ":icon/app"
+    THEME_DEFAULT = ":theme/default"

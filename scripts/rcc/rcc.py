@@ -59,17 +59,17 @@ class Qrc:
 
     def openPrefix(self, prefix: str = None):
         if prefix is not None:
-            self._appendLine('    <qresource prefix="%s">' % prefix.upper())
+            self._appendLine('    <qresource prefix="%s">' % prefix)
         else:
             self._appendLine('    <qresource>')
 
     def appendFile(self, prefix: str, file_path: str):
-        file_alias = splitext(basename(file_path))[0].replace('-', '_', -1).upper()
+        file_alias = splitext(basename(file_path))[0].replace('-', '_', -1)
         self._appendLine('        <file alias="%s">%s</file>' % (file_alias, file_path))
         if prefix == '':
-            self._map.append('    %s = ":%s"' % (file_alias, '/'.join([file_alias])))
+            self._map.append('    %s = ":%s"' % (file_alias.upper(), '/'.join([file_alias])))
         else:
-            self._map.append('    %s_%s = ":%s"' % (prefix, file_alias, '/'.join([prefix, file_alias])))
+            self._map.append('    %s_%s = ":%s"' % (prefix.upper(), file_alias.upper(), '/'.join([prefix, file_alias])))
 
     def closePrefix(self):
         self._appendLine('    </qresource>')
@@ -108,10 +108,10 @@ if __name__ == '__main__':
         file_at = join(root, entry)
         if isdir(file_at):
             # 添加二级资源
-            qrc.openPrefix(entry.upper())
+            qrc.openPrefix(entry)
             for sub, dirs, files in walk(file_at):
                 for sub_entry in files:
-                    qrc.appendFile(entry.upper(), qrc.formatRes(join(sub, sub_entry)))
+                    qrc.appendFile(entry, qrc.formatRes(join(sub, sub_entry)))
             qrc.closePrefix()
         elif isfile(file_at):
             # 缓存一级资源，等待二级资源完成后再添加

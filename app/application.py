@@ -15,7 +15,8 @@ from conf.res_map import ResMap
 from conf.resources import qInitResources
 from helper.env import gEnv
 from helper.gui import Gui
-from view.primary import PrimaryView
+from helper.io import io
+from view.primary_view import PrimaryView
 
 
 class Application(QApplication):
@@ -35,7 +36,7 @@ class Application(QApplication):
         self.setApplicationDisplayName(AppInfo.APP_DISPLAY_NAME)
         self.setApplicationVersion(AppInfo.APP_VERSION)
         self.setWindowIcon(Gui.icon(ResMap.ICON_APP))
-        self.setStyleSheet(ResMap.THEME_DEFAULT)
+        self.setStyleSheet(io.read(ResMap.THEME_DEFAULT))
 
         # 加载主窗口
         self.win = PrimaryView()

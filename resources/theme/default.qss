@@ -37,20 +37,20 @@ QPushButton
     border-radius: 4px;
     background: #f4f8f8;
     font: 15px;
+    margin: 2px 2px 2px 2px;
     min-width: 64px;
     min-height: 32px;
 }
 
-QPushButton::hover,pressed
+QPushButton::hover
 {
-    font: bold;
-    background: #f4f8f8;
+    background: #f4f4f4;
 }
 
 QPushButton::pressed
 {
-    font: bold;
-    margin: 0 4px 0 4px;
+    font: 14px;
+    margin: 3px 3px 3px 3px;
     background: #f4f8f8;
 }
 

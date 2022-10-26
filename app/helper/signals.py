@@ -27,7 +27,8 @@ class Signals(QObject):
     LogInfo = Signal(str)
     LogWarn = Signal(str)
     LogError = Signal(str)
-    LogFatal = Signal(str)
+
+    TabOpenRequested = Signal(str)
 
 
 gSignals = Signals()

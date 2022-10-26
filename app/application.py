@@ -7,6 +7,7 @@
 #  Description: 应用入口
 
 import sys
+import traceback
 
 from PySide6.QtWidgets import QApplication
 
@@ -16,7 +17,13 @@ from conf.resources import qInitResources
 from helper.env import gEnv
 from helper.gui import Gui
 from helper.io import io
+from helper.signals import gSignals
 from view.primary_view import PrimaryView
+
+
+def notify_exception(e_type, e_value, e_traceback):
+    all_exception_lines = traceback.format_exception(e_type, e_value, e_traceback, chain=True)
+    gSignals.LogError.emit('\n'.join(all_exception_lines))
 
 
 class Application(QApplication):
@@ -24,6 +31,8 @@ class Application(QApplication):
 
     def __init__(self):
         super(Application, self).__init__(sys.argv)
+
+        sys.excepthook = notify_exception
 
         # 初始化环境变量
         gEnv.parse(sys.argv)

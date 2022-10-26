@@ -12,8 +12,8 @@ from conf.app_info import AppInfo
 from conf.res_map import ResMap
 from helper.gui import Gui
 from helper.profile import Profile
-from view.log_panel import LogPanel
-from view.services_panel import ServicesPanel
+from view.panel.log_panel import LogPanel
+from view.panel.services_panel import ServicesPanel
 from view.view_base import BaseView
 
 
@@ -63,7 +63,7 @@ class PrimaryView(QMainWindow, BaseView):
         """拦截主窗口关闭事件"""
         msg = QMessageBox(QMessageBox.Icon.Warning,
                           '退出',
-                          '关闭主窗口将停止所有服务，是否确认退出？',
+                          '关闭主窗口将停止所有服务，是否退出？',
                           QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                           self)
         code = msg.exec()

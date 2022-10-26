@@ -1,15 +1,20 @@
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
+#  Since: 2022/10/26
+#  Name: services_panel.py
+#  Author: DoooReyn
+#  Description:
+#
 #  Since: 2022/10/25
 #  Name: services_panel.py
 #  Author: DoooReyn
 #  Description: 服务组件面板
-from PySide6.QtWidgets import QGroupBox, QTabWidget, QTabBar, QWidget, QVBoxLayout, QPushButton
+from PySide6.QtWidgets import QGroupBox, QTabWidget, QTabBar, QVBoxLayout
 
-from helper.flow_layout import FlowLayout
 from helper.gui import Gui
 from helper.signals import gSignals
+from view.tabs.primary_tab import PrimaryTab
 
 
 class ServicesTabs(QTabWidget):
@@ -18,15 +23,7 @@ class ServicesTabs(QTabWidget):
 
         self.setTabsClosable(True)
         self.setupSignals()
-
-        self.tab_main = QWidget()
-        layout_main = FlowLayout()
-        layout_main.setSpacing(10)
-        for i in range(199):
-            layout_main.addWidget(QPushButton(f"服务{i + 9}"))
-        self.tab_main.setLayout(layout_main)
-        self.addTab(self.tab_main, '组件列表')
-
+        self.addTab(PrimaryTab(self), '组件列表')
         self.setTabButtonHidden(0)
 
     # noinspection PyUnresolvedReferences
@@ -70,9 +67,8 @@ class ServicesUI(object):
         self.parent = parent
 
         self.tabs = ServicesTabs()
-
         layout = QVBoxLayout()
-        layout.addWidget(self.tabs, 9)
+        layout.addWidget(self.tabs)
         self.parent.setLayout(layout)
 
 
@@ -81,3 +77,10 @@ class ServicesPanel(QGroupBox):
         super(ServicesPanel, self).__init__('服务组件', parent)
 
         self.ui = ServicesUI(self)
+        self.setupSignals()
+
+    def setupSignals(self):
+        gSignals.TabOpenRequested.connect(self.onTabOpenRequested)
+
+    def onTabOpenRequested(self, service: str):
+        gSignals.LogDebug.emit(f'尝试使用服务：{service}')

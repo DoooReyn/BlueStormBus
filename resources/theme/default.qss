@@ -31,28 +31,28 @@ QToolBar
     spacing: 2px;
 }
 
-QPushButton
-{
-    border: 1px solid #34a7ff;
-    border-radius: 4px;
-    background: #f4f8f8;
-    font: 15px;
-    margin: 2px 2px 2px 2px;
-    min-width: 64px;
-    min-height: 32px;
-}
+/*QPushButton*/
+/*{*/
+/*    border: 1px solid #2c3e50;*/
+/*    border-radius: 4px;*/
+/*    background: #dfe4ea;*/
+/*    font: 15px;*/
+/*    margin: 2px 2px 2px 2px;*/
+/*    min-width: 64px;*/
+/*    min-height: 32px;*/
+/*}*/
 
-QPushButton::hover
-{
-    background: #f4f4f4;
-}
+/*QPushButton::hover*/
+/*{*/
+/*    background: #dfe4ea;*/
+/*}*/
 
-QPushButton::pressed
-{
-    font: 14px;
-    margin: 3px 3px 3px 3px;
-    background: #f4f8f8;
-}
+/*QPushButton::pressed*/
+/*{*/
+/*    font: 14px;*/
+/*    margin: 3px 3px 3px 3px;*/
+/*    background: #dfe4ea;*/
+/*}*/
 
 QToolButton::hover,pressed {
     border: 1px solid #8f8f8f;
@@ -69,9 +69,21 @@ QToolButton::checked {
 
 QTextBrowser
 {
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    background-color: #ffffff;
+    font-size: 14px;
+    selection-background-color: rgba(225, 245, 254, 60%);
+}
+
+QScrollArea
+{
     border: none;
-    border-radius: 4px;
-    background-color: #fbfbfb;
+}
+
+QScrollArea > QWidget > QWidget
+{
+    background: #ffffff;
 }
 
 QScrollBar:vertical

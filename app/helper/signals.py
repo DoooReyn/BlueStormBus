@@ -8,6 +8,8 @@
 
 from PySide6.QtCore import QObject, Signal
 
+from conf.service_info import ServiceInfo
+
 
 class Signals(QObject):
     """全局信号"""
@@ -28,7 +30,7 @@ class Signals(QObject):
     LogWarn = Signal(str)
     LogError = Signal(str)
 
-    TabOpenRequested = Signal(str)
+    TabOpenRequested = Signal(ServiceInfo)
 
 
 gSignals = Signals()

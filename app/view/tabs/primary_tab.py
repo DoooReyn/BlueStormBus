@@ -44,22 +44,5 @@ class PrimaryTab(QWidget):
         btn = QPushButton(service.title)
         btn.setToolTip(service.tooltip)
         # noinspection PyUnresolvedReferences
-        btn.clicked.connect(lambda: self.onServiceOpenRequested(service.key))
+        btn.clicked.connect(lambda: gSignals.TabOpenRequested.emit(service))
         self.ui.layout_content.addWidget(btn)
-
-    def onServiceOpenRequested(self, key: str):
-        if hasattr(self, key):
-            getattr(self, key)()
-
-    def meta_watch_dog(self):
-        gSignals.LogDebug.emit('---meta_watch_dog---')
-
-
-    def png_compressor(self):
-        gSignals.LogDebug.emit('---png_compressor---')
-
-    def jpg_compressor(self):
-        gSignals.LogDebug.emit('---jpg_compressor---')
-
-    def image_splitter(self):
-        gSignals.LogDebug.emit('---image_splitter---')

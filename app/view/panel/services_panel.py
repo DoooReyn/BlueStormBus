@@ -10,8 +10,9 @@
 #  Name: services_panel.py
 #  Author: DoooReyn
 #  Description: 服务组件面板
-from PySide6.QtWidgets import QGroupBox, QTabWidget, QTabBar, QVBoxLayout
+from PySide6.QtWidgets import QGroupBox, QTabWidget, QTabBar, QVBoxLayout, QWidget
 
+from conf.service_info import ServiceInfo
 from helper.gui import Gui
 from helper.signals import gSignals
 from view.tabs.primary_tab import PrimaryTab
@@ -55,11 +56,9 @@ class ServicesTabs(QTabWidget):
 
     def onTabBarDoubleClicked(self, index: int):
         print('onTabBarDoubleClicked: ', self.tabText(index))
-        gSignals.LogDebug.emit(f'onTabBarDoubleClicked: {self.tabText(index)}')
 
     def onTabIndexChanged(self, index: int):
         print('onTabIndexChanged: ', self.tabText(index))
-        gSignals.LogDebug.emit(f'onTabIndexChanged: {self.tabText(index)}')
 
 
 class ServicesUI(object):
@@ -82,5 +81,30 @@ class ServicesPanel(QGroupBox):
     def setupSignals(self):
         gSignals.TabOpenRequested.connect(self.onTabOpenRequested)
 
-    def onTabOpenRequested(self, service: str):
-        gSignals.LogDebug.emit(f'尝试使用服务：{service}')
+    def onTabOpenRequested(self, service: ServiceInfo):
+        opened = -1
+        for i in range(self.ui.tabs.count()):
+            title = self.ui.tabs.tabText(i)
+            if title == service.title:
+                opened = i
+                break
+        if opened == -1:
+            if hasattr(self, service.key):
+                widget = getattr(self, service.key)(service)
+                opened = self.ui.tabs.addTab(widget, service.title)
+            else:
+                return gSignals.LogWarn.emit(f'服务{service.key}未实现！')
+        self.ui.tabs.setCurrentIndex(opened)
+
+    def meta_watch_dog(self, service):
+        return QWidget()
+
+    def png_compressor(self, service):
+        return QWidget()
+
+    def jpg_compressor(self, service):
+        return QWidget()
+
+    def image_splitter(self, service):
+        return QWidget()
+

@@ -22,11 +22,12 @@ class Logger:
             when='midnight',
             interval=1,
             backupCount=3,
+            encoding='utf-8'
         )
         all_handler.setFormatter(all_formatter)
 
         err_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(filename)s[:%(lineno)d] - %(message)s")
-        err_handler = logging.FileHandler('error.log')
+        err_handler = logging.FileHandler('error.log', 'w', encoding='utf-8')
         err_handler.setLevel(logging.ERROR)
         err_handler.setFormatter(err_formatter)
 

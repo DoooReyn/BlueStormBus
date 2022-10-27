@@ -1,10 +1,7 @@
+# -*- coding:utf-8 -*-
+#
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
-#
-#  Since: 2022/10/26
-#  Name: log_panel.py
-#  Author: DoooReyn
-#  Description:
 #
 #  Since: 2022/10/25
 #  Name: log_panel.py
@@ -18,6 +15,7 @@ from PySide6.QtGui import QTextOption, QAction
 from PySide6.QtWidgets import QGroupBox, QTextBrowser, QHBoxLayout, QMenu
 
 from helper.env import gEnv
+from helper.logger import gLogger
 from helper.signals import gSignals
 
 
@@ -95,6 +93,14 @@ class LogPanel(QGroupBox):
         gSignals.LogError.connect(lambda msg: self.onAppendLog(LogLevel.Error, msg))
 
     def onAppendLog(self, kind: LogLevel, msg: str):
+        if kind == LogLevel.Debug:
+            gLogger.debug(msg)
+        elif kind == LogLevel.Info:
+            gLogger.info(msg)
+        elif kind == LogLevel.Warn:
+            gLogger.warn(msg)
+        elif kind == LogLevel.Error:
+            gLogger.error(msg)
         now = time.strftime("[%Y-%m-%d %H:%M:%S]", time.localtime())
         self.ui.browser.append(getattr(LogStyle, kind.name).format(now))
         for sec in msg.split('\n'):

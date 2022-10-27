@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+#
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
@@ -13,6 +15,7 @@ from PySide6.QtCore import QRect
 
 from helper.env import gEnv
 from helper.io import io
+from helper.logger import gLogger
 
 
 class Profile(ABC):
@@ -61,7 +64,7 @@ class Profile(ABC):
             for k, v in data.items():
                 self._data[k] = v
         self.save()
-        gEnv.log(f'profile: {self._where} => {self._data}')
+        gLogger.debug(f'profile: {self._where} => {self._data}')
 
     def save(self):
         """保存数据"""

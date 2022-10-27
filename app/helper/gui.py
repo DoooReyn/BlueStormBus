@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+#
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #

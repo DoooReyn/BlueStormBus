@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+#
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
@@ -14,8 +16,9 @@ from helper.signals import gSignals
 
 class PrimaryTabUI(object):
     def __init__(self, view: QWidget):
-        self.view = view
+        super(PrimaryTabUI, self).__init__()
 
+        self.view = view
         self.content = QWidget()
         self.layout_content = FlowLayout()
         self.layout_content.setSpacing(8)

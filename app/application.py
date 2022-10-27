@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+#
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
@@ -23,7 +25,8 @@ from view.primary_view import PrimaryView
 
 def notify_exception(e_type, e_value, e_traceback):
     all_exception_lines = traceback.format_exception(e_type, e_value, e_traceback, chain=True)
-    gSignals.LogError.emit('\n'.join(all_exception_lines))
+    messages = '\n'.join(all_exception_lines)
+    gSignals.e(messages)
 
 
 class Application(QApplication):

@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+#
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
@@ -31,6 +33,18 @@ class Signals(QObject):
     LogError = Signal(str)
 
     TabOpenRequested = Signal(ServiceInfo)
+
+    def d(self, msg: str):
+        self.LogDebug.emit(msg)
+
+    def i(self, msg: str):
+        self.LogInfo.emit(msg)
+
+    def w(self, msg: str):
+        self.LogWarn.emit(msg)
+
+    def e(self, msg: str):
+        self.LogError.emit(msg)
 
 
 gSignals = Signals()

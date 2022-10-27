@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+#
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
@@ -15,6 +17,7 @@ from PySide6.QtCore import QStandardPaths, QIODevice, QFile
 
 from conf.app_info import AppInfo
 from helper.env import gEnv
+from helper.logger import gLogger
 
 
 class IO:
@@ -61,7 +64,7 @@ class IO:
         try:
             return loads(content)
         except (JSONDecodeError, TypeError) as e:
-            gEnv.log(f'解析Json失败: {e.msg}')
+            gLogger.error(f'解析Json失败: {e.msg}')
 
     @staticmethod
     def jsonEncode(content: Union[Dict, List]):

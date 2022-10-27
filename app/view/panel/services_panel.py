@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+#
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
@@ -14,7 +16,9 @@ from PySide6.QtWidgets import QGroupBox, QTabWidget, QTabBar, QVBoxLayout, QWidg
 
 from conf.service_info import ServiceInfo
 from helper.gui import Gui
+from helper.logger import gLogger
 from helper.signals import gSignals
+from view.tabs.meta_watch_dog_tab import MetaWatchDogTab
 from view.tabs.primary_tab import PrimaryTab
 
 
@@ -38,12 +42,10 @@ class ServicesTabs(QTabWidget):
         self.tabBar().setTabButton(index, QTabBar.ButtonPosition.RightSide, None)
 
     def tabInserted(self, index: int):
-        print('onTabAdded', self.tabText(index))
-        gSignals.LogDebug.emit(f'onTabAdded: {self.tabText(index)}')
+        gLogger.debug(f'onTabAdded: {self.tabText(index)}')
 
     def tabRemoved(self, index: int):
-        print('onTabRemoved', self.tabText(index))
-        gSignals.LogDebug.emit(f'onTabRemoved: {self.tabText(index)}')
+        gLogger.debug(f'onTabRemoved: {self.tabText(index)}')
 
     def onTabCloseRequested(self, tab: int):
         if tab > 0:
@@ -52,13 +54,13 @@ class ServicesTabs(QTabWidget):
             Gui.app().beep()
 
     def onTabBarClicked(self, index: int):
-        gSignals.LogDebug.emit(f'onTabBarClicked: {self.tabText(index)}')
+        gLogger.debug(f'onTabBarClicked: {self.tabText(index)}')
 
     def onTabBarDoubleClicked(self, index: int):
-        print('onTabBarDoubleClicked: ', self.tabText(index))
+        gLogger.debug(f'onTabBarDoubleClicked: {self.tabText(index)}')
 
     def onTabIndexChanged(self, index: int):
-        print('onTabIndexChanged: ', self.tabText(index))
+        gLogger.debug(f'onTabIndexChanged: {self.tabText(index)}')
 
 
 class ServicesUI(object):
@@ -93,11 +95,12 @@ class ServicesPanel(QGroupBox):
                 widget = getattr(self, service.key)(service)
                 opened = self.ui.tabs.addTab(widget, service.title)
             else:
-                return gSignals.LogWarn.emit(f'服务{service.key}未实现！')
+                return gSignals.w(f'服务{service.key}未实现！')
         self.ui.tabs.setCurrentIndex(opened)
 
-    def meta_watch_dog(self, service):
-        return QWidget()
+    @staticmethod
+    def meta_watch_dog(service):
+        return MetaWatchDogTab(service)
 
     def png_compressor(self, service):
         return QWidget()
@@ -105,6 +108,5 @@ class ServicesPanel(QGroupBox):
     def jpg_compressor(self, service):
         return QWidget()
 
-    def image_splitter(self, service):
-        return QWidget()
-
+    # def image_splitter(self, service):
+    #     return QWidget()

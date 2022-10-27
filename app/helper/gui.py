@@ -24,8 +24,16 @@ class Gui:
         return QApplication.instance()
 
     @staticmethod
+    def clipboard():
+        return QApplication.clipboard()
+
+    @staticmethod
     def beep():
         Gui.app().beep()
+
+    @staticmethod
+    def copyText(text: str):
+        Gui.clipboard().setText(text)
 
     @staticmethod
     def icon(path: str):

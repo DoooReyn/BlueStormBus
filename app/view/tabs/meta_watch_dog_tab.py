@@ -41,12 +41,14 @@ class MetaWatchDogTabUI(object):
         self.layout = QGridLayout()
         self.edit_help = QTextEdit(service.tooltip)
         self.edit_help.setReadOnly(True)
+        self.edit_help.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.edit_help.setStyleSheet('QTextEdit { background-color: #f0f0f0; }')
         self.edit_help.setFixedHeight(max(self.edit_help.document().size().height(), 64))
         self.edit_where = QLineEdit('')
         self.edit_where.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.edit_where.setPlaceholderText('打开 Cocos Creator 项目')
         self.edit_where.setReadOnly(True)
+        self.edit_where.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_open = QPushButton('浏览')
         self.btn_operate = QPushButton('启动服务')
         self.btn_operate.setFixedSize(96, 24)
@@ -81,9 +83,10 @@ class MetaWatchDogTab(TabBase):
     # noinspection PyUnresolvedReferences
     def setupSignals(self):
         self.ui.edit_where.textChanged.connect(self.onProjectPathChanged)
+        self.ui.edit_where.selectionChanged.connect(lambda: self.ui.edit_where.deselect())
+        self.ui.edit_where.customContextMenuRequested.connect(self.onProjectPathContextMenuRequested)
         self.ui.btn_open.clicked.connect(self.onBrowserProjectPath)
         self.ui.btn_operate.clicked.connect(self.onCheckServiceState)
-        self.ui.edit_where.customContextMenuRequested.connect(self.onProjectPathContextMenuRequested)
         gSignals.TabCloseRequested.connect(self.onCloseRequested)
 
     def setupUi(self):
@@ -97,15 +100,9 @@ class MetaWatchDogTab(TabBase):
         act_copy = QAction('复制', self.ui.edit_where)
         act_copy.setShortcut('Ctrl+C')
         act_copy.setEnabled(len(self.ui.edit_where.text()) > 0)
-        pop_menu.addAction(act_copy)
-
-        def copy():
-            self.ui.edit_where.selectAll()
-            self.ui.edit_where.copy()
-            self.ui.edit_where.setCursorPosition(-1)
-
         # noinspection PyUnresolvedReferences
-        act_copy.triggered.connect(copy)
+        act_copy.triggered.connect(lambda: Gui.copyText(self.ui.edit_where.text()))
+        pop_menu.addAction(act_copy)
         pop_menu.exec_(self.ui.edit_where.mapToGlobal(pos))
 
     def onBrowserProjectPath(self):
@@ -120,10 +117,11 @@ class MetaWatchDogTab(TabBase):
             self.run()
 
     def run(self):
-        # if len(self.ui.edit_where.text()) == 0:
-        #     def finished():
-        #         self.ui.btn_operate.setChecked(False)
-        #     return Gui.popup('警告', '请选择 Cocos Creator 项目目录', self, finished, finished)
+        if len(self.ui.edit_where.text()) == 0:
+            def finished():
+                self.ui.btn_operate.setChecked(False)
+
+            return Gui.popup('警告', '请选择 Cocos Creator 项目目录', self, finished, finished)
         self.ui.btn_operate.setChecked(True)
         self.ui.btn_operate.setText('停止服务')
         super(MetaWatchDogTab, self).run()

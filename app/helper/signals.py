@@ -33,17 +33,23 @@ class Signals(QObject):
     LogError = Signal(str)
 
     TabOpenRequested = Signal(ServiceInfo)
+    TabCloseRequested = Signal(int, str)
+    TabCloseAllowed = Signal(int)
 
     def d(self, msg: str):
+        # noinspection PyUnresolvedReferences
         self.LogDebug.emit(msg)
 
     def i(self, msg: str):
+        # noinspection PyUnresolvedReferences
         self.LogInfo.emit(msg)
 
     def w(self, msg: str):
+        # noinspection PyUnresolvedReferences
         self.LogWarn.emit(msg)
 
     def e(self, msg: str):
+        # noinspection PyUnresolvedReferences
         self.LogError.emit(msg)
 
 

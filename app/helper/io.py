@@ -27,6 +27,14 @@ class IO:
         self.mkdir(self.appStorageAt())
 
     @staticmethod
+    def pictureAt():
+        return QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
+
+    @staticmethod
+    def documentAt():
+        return QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
+
+    @staticmethod
     def localCacheAt():
         """本地缓存路径"""
         return QStandardPaths.writableLocation(QStandardPaths.GenericConfigLocation)

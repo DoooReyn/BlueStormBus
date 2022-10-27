@@ -7,14 +7,15 @@
 #  Name: gui.py
 #  Author: DoooReyn
 #  Description: GUI 辅助工具
-
-from typing import Union
+from os.path import isdir
+from typing import Union, Callable
 
 from PySide6.QtCore import QUrl, QPoint
-from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon, QGuiApplication, QDesktopServices
+from PySide6.QtWidgets import QApplication, QWidget, QMessageBox, QFileDialog
 
 from conf.app_info import AppInfo
+from helper.io import io
 
 
 class Gui:
@@ -48,3 +49,35 @@ class Gui:
     @staticmethod
     def openExternalUrl(url: Union[QUrl, str]):
         QDesktopServices().openUrl(url)
+
+    @staticmethod
+    def popup(title: str,
+              message: str,
+              parent: QWidget,
+              ok: Callable = None,
+              bad: Callable = None,
+              icon: QMessageBox.Icon = QMessageBox.Icon.Warning):
+        buttons = QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        code = QMessageBox(icon, title, message, buttons, parent).exec()
+        if code == QMessageBox.StandardButton.Yes and ok is not None:
+            ok()
+        elif code == QMessageBox.StandardButton.No and bad is not None:
+            bad()
+
+    @staticmethod
+    def pickFiles(title: str, start: str, file_filter: str = 'Any Files(*.*)', multiple: bool = False,
+                  parent: QWidget = None):
+        start = start if len(start) > 0 else io.documentAt()
+        if multiple:
+            chosen = QFileDialog.getOpenFileNames(parent, title, start, file_filter)
+        else:
+            chosen = QFileDialog.getOpenFileName(parent, title, start, file_filter)
+        if isinstance(chosen, tuple) and len(chosen) > 0:
+            return chosen
+
+    @staticmethod
+    def pickDirectory(title: str, start: str, parent: QWidget):
+        start = start if len(start) > 0 else io.documentAt()
+        chosen = QFileDialog.getExistingDirectory(parent, title, start)
+        if isdir(chosen):
+            return chosen

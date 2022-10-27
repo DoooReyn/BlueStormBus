@@ -8,7 +8,7 @@
 #  Author: DoooReyn
 #  Description: 主窗口
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMainWindow, QWidget, QMessageBox, QSplitter, QVBoxLayout
+from PySide6.QtWidgets import QMainWindow, QWidget, QSplitter, QVBoxLayout
 
 from conf.app_info import AppInfo
 from conf.res_map import ResMap
@@ -63,14 +63,13 @@ class PrimaryView(QMainWindow, BaseView):
 
     def closeEvent(self, event):
         """拦截主窗口关闭事件"""
-        msg = QMessageBox(QMessageBox.Icon.Warning,
-                          '退出',
-                          '关闭主窗口将停止所有服务，是否退出？',
-                          QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                          self)
-        code = msg.exec()
-        if code == QMessageBox.StandardButton.Yes:
+
+        def ok():
             event.accept()
+            # TODO 关闭所有服务
             super(PrimaryView, self).closeEvent(event)
-        elif code == QMessageBox.StandardButton.No:
+
+        def bad():
             event.ignore()
+
+        Gui.popup('退出', '关闭主窗口将停止所有服务，是否退出？', self, ok, bad)

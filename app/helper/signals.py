@@ -36,6 +36,9 @@ class Signals(QObject):
     TabCloseRequested = Signal(int, str)
     TabCloseAllowed = Signal(int)
 
+    ServiceForceStop = Signal()
+    MetaChangedInfo = Signal(str)
+
     def d(self, msg: str):
         # noinspection PyUnresolvedReferences
         self.LogDebug.emit(msg)

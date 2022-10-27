@@ -65,7 +65,9 @@ class Gui:
               ok: Callable = None,
               bad: Callable = None,
               icon: QMessageBox.Icon = QMessageBox.Icon.Warning):
-        buttons = QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        buttons = QMessageBox.StandardButton.Yes
+        if bad is not None:
+            buttons |= QMessageBox.StandardButton.No
         code = QMessageBox(icon, title, message, buttons, parent).exec()
         if code == QMessageBox.StandardButton.Yes and ok is not None:
             ok()

@@ -6,19 +6,27 @@
 #  Since: 2022/10/26
 #  Name: meta_watch_dog_tab.py
 #  Author: DoooReyn
-#  Description:
+#  Description: Cocos Creator Meta 文件自动同步
 import os
 import threading
 import time
+from datetime import datetime
 from os.path import join, isfile, isdir, realpath, exists
 from typing import Callable, Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QTextCursor
-from PySide6.QtWidgets import QWidget, QGridLayout, QTextEdit, QPushButton, QLineEdit, QMenu, QMessageBox
-from watchdog.events import (
-    FileSystemEventHandler,
-    EVENT_TYPE_MOVED, )
+from PySide6.QtWidgets import (
+    QWidget,
+    QGridLayout,
+    QTextEdit,
+    QPushButton,
+    QLineEdit,
+    QMenu,
+    QMessageBox,
+    QLabel,
+    QSpinBox)
+from watchdog.events import FileSystemEventHandler, EVENT_TYPE_MOVED, EVENT_TYPE_DELETED
 from watchdog.observers import Observer
 from watchdog.observers.api import ObservedWatch
 from watchdog.utils import WatchdogShutdown
@@ -41,7 +49,7 @@ class FileHandler(FileSystemEventHandler):
         self.feedback = feedback
         self.snapshot = self.takeSnapshot()
         self._dirty = False
-        self._diff = []
+        self._operates = dict()
 
     def takeSnapshot(self):
         return DirectorySnapshot(self.watch_path, self.is_recursive, os.stat, os.listdir)
@@ -50,7 +58,7 @@ class FileHandler(FileSystemEventHandler):
         current = self.takeSnapshot()
         diff = DirectorySnapshotDiff(self.snapshot, current, ignore_device=True)
         self.snapshot = current
-        self._diff = []
+        self._operates.clear()
 
         if len(diff.files_created) > 0:
             self.on_files_created(diff.files_created)
@@ -64,44 +72,43 @@ class FileHandler(FileSystemEventHandler):
         if len(diff.files_moved) > 0:
             self.on_files_moved(diff.files_moved)
 
-        if self._dirty:
+        diff = [datetime.now().strftime('[%H:%M:%S] 同步')]
+        if len(self._operates) > 0:
+            for src, info in self._operates.items():
+                act = info.get('operate')
+                if act == EVENT_TYPE_MOVED:
+                    dst = info.get('dst')
+                    os.rename(src, dst)
+                    diff.append(f'[重命名] {src} => {dst}')
+                elif act == EVENT_TYPE_DELETED:
+                    if not exists(src[:-4]):
+                        os.remove(src)
+                        diff.append(f'[删除] {src}')
             self.snapshot = self.takeSnapshot()
-            self._dirty = False
-            gSignals.MetaChangedInfo.emit('\n'.join(self._diff))
+        else:
+            diff.append('暂无更新')
+        gSignals.MetaChangedInfo.emit('\n'.join(diff))
 
     def on_files_created(self, files: list):
         pass
 
     def on_files_moved(self, files: list):
-        renamed = []
         for src, dst in files:
-            print(f'--moved: {src} => {dst}')
             if not src.endswith('.meta'):
                 meta_src = src + '.meta'
                 meta_dst = dst + '.meta'
                 if exists(meta_src):
-                    renamed.append((meta_src, meta_dst,))
-        if len(renamed) > 0:
-            for src, dst in renamed:
-                os.rename(src, dst)
-                self._diff.append(f'[重命名] {src} => {dst}')
-            self._dirty = True
+                    self._operates[meta_src] = {'operate': EVENT_TYPE_MOVED, 'dst': meta_dst}
 
     def on_files_modified(self, files: list):
         pass
 
     def on_files_deleted(self, files: list):
-        removed = []
         for f in files:
             if not f.endswith('.meta'):
                 meta_src = f + '.meta'
-                if exists(meta_src):
-                    removed.append(meta_src)
-        if len(removed) > 0:
-            for f in removed:
-                os.remove(f)
-                self._diff.append(f'[删除] {f}')
-            self._dirty = True
+                if exists(meta_src) and self._operates.get(meta_src) is None:
+                    self._operates[meta_src] = {'operate': EVENT_TYPE_DELETED}
 
 
 class MetaWatchDog:
@@ -109,23 +116,29 @@ class MetaWatchDog:
         self.dog = Observer()
         self.feedback = feedback
         self.watchObject: Optional[ObservedWatch] = None
+        self.handler: Optional[FileHandler] = None
 
-    def watch(self, where: str):
+    def watch(self, where: str, cycle: int):
         def run():
-            handler = FileHandler(where, True, self.feedback)
-            self.watchObject = self.dog.schedule(handler, where, recursive=True)
+            self.handler = FileHandler(where, True, self.feedback)
+            self.watchObject = self.dog.schedule(self.handler, where, recursive=True)
             self.dog.start()
             try:
                 while True:
-                    time.sleep(2)
-                    handler.diffSnapshot()
+                    time.sleep(cycle)
+                    self.handler.diffSnapshot()
             except WatchdogShutdown:
+                self.handler = None
                 self.stop()
                 thread.join(30)
 
         thread = threading.Thread(target=run)
         thread.daemon = True
         thread.start()
+
+    def sync(self):
+        if self.handler is not None:
+            self.handler.diffSnapshot()
 
     def stop(self):
         if self.watchObject is not None:
@@ -138,8 +151,9 @@ class MetaWatchDog:
 class MetaWatchDogProfile(Profile):
     def template(self):
         return {
-            "identifier": "primary",  # required
+            "identifier": "meta_watch_dog",  # required
             "last_project_at": "",  # required
+            "sync_after": 60
         }
 
     def setLastProjectAt(self, at: str):
@@ -147,6 +161,12 @@ class MetaWatchDogProfile(Profile):
 
     def getLastProjectAt(self):
         return self.get("last_project_at")
+
+    def getSyncAfter(self):
+        return self.get("sync_after")
+
+    def setSyncAfter(self, after):
+        self.set("sync_after", after)
 
 
 class MetaWatchDogTabUI(object):
@@ -167,6 +187,12 @@ class MetaWatchDogTabUI(object):
         self.edit_where.setReadOnly(True)
         self.edit_where.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_open = QPushButton('浏览')
+        self.lab_sync = QLabel('同步周期(秒)')
+        self.spin_sync = QSpinBox()
+        self.spin_sync.setMinimum(1)
+        self.spin_sync.setMaximum(3600)
+        self.btn_sync = QPushButton('手动同步')
+        self.btn_sync.setFixedSize(96, 24)
         self.btn_operate = QPushButton('启动服务')
         self.btn_operate.setFixedSize(96, 24)
         self.btn_operate.setStyleSheet(
@@ -176,15 +202,19 @@ class MetaWatchDogTabUI(object):
         self.btn_operate.setChecked(False)
         self.edit_log = QTextEdit('')
         self.edit_log.setReadOnly(True)
+        self.edit_log.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.edit_log.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
         self.layout.addWidget(self.edit_help, 0, 0, 2, 10)
-        self.layout.addWidget(self.edit_where, 2, 0, 1, 8)
-        self.layout.addWidget(self.btn_open, 2, 8, 1, 1)
+        self.layout.addWidget(self.edit_where, 2, 0, 1, 5)
+        self.layout.addWidget(self.btn_open, 2, 5, 1, 1)
+        self.layout.addWidget(self.lab_sync, 2, 6, 1, 1)
+        self.layout.addWidget(self.spin_sync, 2, 7, 1, 1)
+        self.layout.addWidget(self.btn_sync, 2, 8, 1, 1)
         self.layout.addWidget(self.btn_operate, 2, 9, 1, 1)
         self.layout.addWidget(self.edit_log, 3, 0, 7, 10)
         self.layout.setColumnStretch(0, 1)
-        self.layout.setRowStretch(9, 1)
+        self.layout.setRowStretch(4, 1)
         self.view.setLayout(self.layout)
 
 
@@ -207,6 +237,8 @@ class MetaWatchDogTab(TabBase):
         self.ui.edit_log.customContextMenuRequested.connect(self.onProjectLogContextMenuRequested)
         self.ui.btn_open.clicked.connect(self.onBrowserProjectPath)
         self.ui.btn_operate.clicked.connect(self.onCheckServiceState)
+        self.ui.btn_sync.clicked.connect(self.onSyncManually)
+        self.ui.spin_sync.valueChanged.connect(self.onSyncAfterChanged)
         gSignals.TabCloseRequested.connect(self.onCloseRequested)
         gSignals.ServiceForceStop.connect(self.onQuitAllowed)
         gSignals.MetaChangedInfo.connect(self.appendLog)
@@ -216,6 +248,9 @@ class MetaWatchDogTab(TabBase):
         if last_project_at:
             self.ui.edit_where.setText(last_project_at)
             self.checkProjectPath(last_project_at)
+        sync_after = self.profile.getSyncAfter()
+        self.ui.spin_sync.setValue(sync_after)
+        self.ui.btn_sync.setEnabled(False)
 
     def onProjectPathChanged(self):
         self.profile.setLastProjectAt(self.ui.edit_where.text())
@@ -282,6 +317,14 @@ class MetaWatchDogTab(TabBase):
         else:
             self.run()
 
+    def onSyncManually(self):
+        if self.isRunning():
+            self.watch_dog.sync()
+
+    def onSyncAfterChanged(self):
+        self.profile.setSyncAfter(self.ui.spin_sync.value())
+        self.profile.save()
+
     def getWatchDir(self):
         return join(self.ui.edit_where.text(), 'assets')
 
@@ -294,14 +337,18 @@ class MetaWatchDogTab(TabBase):
             return Gui.popup('警告', '请选择 Cocos Creator 项目目录', self, ok)
 
         self.appendLog('Meta监听服务已启动...')
+        self.ui.btn_sync.setEnabled(True)
+        self.ui.spin_sync.setEnabled(False)
         self.ui.btn_operate.setChecked(True)
         self.ui.btn_operate.setText('停止服务')
-        self.watch_dog.watch(self.getWatchDir())
+        self.watch_dog.watch(self.getWatchDir(), cycle=self.profile.getSyncAfter())
         super(MetaWatchDogTab, self).run()
 
     def stop(self):
         super(MetaWatchDogTab, self).stop()
         self.watch_dog.stop()
+        self.ui.btn_sync.setEnabled(False)
+        self.ui.spin_sync.setEnabled(True)
         self.ui.btn_operate.setChecked(False)
         self.ui.btn_operate.setText('启动服务')
         self.appendLog('Meta监听服务已停止...')
@@ -319,6 +366,3 @@ class MetaWatchDogTab(TabBase):
         self.profile.save()
         self.stop()
         super(MetaWatchDogTab, self).onQuitAllowed()
-
-
-# TODO 从其他目录移动相同文件名的文件会把目标目录下的meta文件删除掉！

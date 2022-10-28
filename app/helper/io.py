@@ -10,43 +10,13 @@
 
 from json import loads, dumps, JSONDecodeError
 from os import makedirs
-from os.path import join, exists, isfile
-from typing import List, Union, Dict, Sequence
+from typing import List, Union, Dict
 
-from PySide6.QtCore import QStandardPaths, QIODevice, QFile
-
-from conf.app_info import AppInfo
-from helper.env import gEnv
-from helper.logger import gLogger
+from PySide6.QtCore import QIODevice, QFile
 
 
 class IO:
     """文件系统IO操作"""
-
-    def __init__(self):
-        self.mkdir(self.appStorageAt())
-
-    @staticmethod
-    def pictureAt():
-        return QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
-
-    @staticmethod
-    def documentAt():
-        return QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
-
-    @staticmethod
-    def localCacheAt():
-        """本地缓存路径"""
-        return QStandardPaths.writableLocation(QStandardPaths.GenericConfigLocation)
-
-    @staticmethod
-    def appStorageAt():
-        """应用缓存路径"""
-        return join(IO.localCacheAt(), AppInfo.APP_NAME)
-
-    @staticmethod
-    def joinPaths(start: str, paths: Sequence[str]):
-        return join(start, *paths)
 
     @staticmethod
     def mkdir(directory: str):
@@ -72,12 +42,9 @@ class IO:
         try:
             return loads(content)
         except (JSONDecodeError, TypeError) as e:
-            gLogger.error(f'解析Json失败: {e.msg}')
+            print(f'解析Json失败: {e.msg}')
 
     @staticmethod
     def jsonEncode(content: Union[Dict, List]):
         """json编码"""
         return dumps(content, ensure_ascii=False, indent=2)
-
-
-io = IO()

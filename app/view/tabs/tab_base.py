@@ -11,9 +11,8 @@ from abc import abstractmethod
 
 from PySide6.QtWidgets import QWidget
 
-from conf.service_info import ServiceInfo
-from helper.gui import Gui
-from helper.signals import gSignals
+from conf import ServiceInfo, signals
+from helper import Gui
 
 
 class TabBase(QWidget):
@@ -53,9 +52,10 @@ class TabBase(QWidget):
         return False
 
     def onQuitAllowed(self):
-        gSignals.TabCloseAllowed.emit(self._quit_tab)
+        signals.TabCloseAllowed.emit(self._quit_tab)
 
     def onQuitDenied(self):
         def bad():
             self._quit_tab = -1
+
         Gui.popup('用户请求关闭服务', '服务运行中，是否停止并退出？', self, lambda: self.onQuitAllowed(), bad)

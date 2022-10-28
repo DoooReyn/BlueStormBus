@@ -54,6 +54,3 @@ class Signals(QObject):
     def e(self, msg: str):
         # noinspection PyUnresolvedReferences
         self.LogError.emit(msg)
-
-
-gSignals = Signals()

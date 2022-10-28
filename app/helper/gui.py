@@ -10,15 +10,17 @@
 from os.path import isdir
 from typing import Union, Callable
 
-from PySide6.QtCore import QUrl, QPoint
+from PySide6.QtCore import QUrl, QPoint, QRect
 from PySide6.QtGui import QIcon, QGuiApplication, QDesktopServices
 from PySide6.QtWidgets import QApplication, QWidget, QMessageBox, QFileDialog
 
-from conf.app_info import AppInfo
-from helper.io import io
+from conf import Paths, AppInfo
 
 
 class Gui:
+    def __init__(self):
+        pass
+
     @staticmethod
     def app():
         return QApplication.instance()
@@ -55,6 +57,15 @@ class Gui:
         return rect
 
     @staticmethod
+    def rectAsList(rect: QRect):
+        return [
+            rect.topLeft().x(),
+            rect.topLeft().y(),
+            rect.width(),
+            rect.height()
+        ]
+
+    @staticmethod
     def openExternalUrl(url: Union[QUrl, str]):
         QDesktopServices().openUrl(url)
 
@@ -77,7 +88,7 @@ class Gui:
     @staticmethod
     def pickFiles(title: str, start: str, file_filter: str = 'Any Files(*.*)', multiple: bool = False,
                   parent: QWidget = None):
-        start = start if len(start) > 0 else io.documentAt()
+        start = start if len(start) > 0 else Paths.documentAt()
         if multiple:
             chosen = QFileDialog.getOpenFileNames(parent, title, start, file_filter)
         else:
@@ -87,7 +98,7 @@ class Gui:
 
     @staticmethod
     def pickDirectory(title: str, start: str, parent: QWidget):
-        start = start if len(start) > 0 else io.documentAt()
+        start = start if len(start) > 0 else Paths.documentAt()
         chosen = QFileDialog.getExistingDirectory(parent, title, start)
         if isdir(chosen):
             return chosen

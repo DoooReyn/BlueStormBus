@@ -11,10 +11,7 @@
 from argparse import ArgumentParser
 from typing import Sequence
 
-from helper.decorator import Decorator
 
-
-@Decorator.singleton
 class Env:
     def __init__(self):
         self._debug = False
@@ -28,6 +25,3 @@ class Env:
 
     def isDebug(self):
         return self._debug
-
-
-gEnv = Env()

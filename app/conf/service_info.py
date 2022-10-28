@@ -19,12 +19,16 @@ class AutoIncreaseId:
 
 
 class ServiceInfo:
+    ID = AutoIncreaseId()
+
     def __init__(self, key: str, title: str, tooltip: str):
-        global gTabId
         self.key = key
         self.title = title
         self.tooltip = tooltip
-        self.id = gTabId.get()
+        self.id = ServiceInfo.ID.get()
 
+    def __str__(self):
+        return f"<{self.id}> [{self.key}] {self.title}"
 
-gTabId = AutoIncreaseId()
+    def __repr__(self):
+        return self.__str__()

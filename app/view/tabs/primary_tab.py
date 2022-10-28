@@ -9,9 +9,8 @@
 #  Description:
 from PySide6.QtWidgets import QVBoxLayout, QWidget, QPushButton, QScrollArea
 
-from conf.service_info import ServiceInfo
-from helper.flow_layout import FlowLayout
-from helper.signals import gSignals
+from conf import ServiceInfo, signals
+from helper import FlowLayout
 
 
 class PrimaryTabUI(object):
@@ -47,5 +46,5 @@ class PrimaryTab(QWidget):
         btn = QPushButton(service.title)
         btn.setToolTip(service.tooltip)
         # noinspection PyUnresolvedReferences
-        btn.clicked.connect(lambda: gSignals.TabOpenRequested.emit(service))
+        btn.clicked.connect(lambda: signals.TabOpenRequested.emit(service))
         self.ui.layout_content.addWidget(btn)

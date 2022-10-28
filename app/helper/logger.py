@@ -7,28 +7,28 @@
 #  Name: logger.py
 #  Author: DoooReyn
 #  Description: 日志记录
-import logging
-import logging.handlers
+from logging import getLogger, DEBUG, ERROR, Formatter, FileHandler
+from logging.handlers import TimedRotatingFileHandler
+from os.path import join
+
+from conf import AppInfo, Paths
 
 
 class Logger:
-    def __init__(self, tag: str):
-        self._container = logging.getLogger(tag)
-        self._container.setLevel(logging.DEBUG)
+    def __init__(self):
+        self._container = getLogger(AppInfo.APP_NAME)
+        self._container.setLevel(DEBUG)
 
-        all_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-        all_handler = logging.handlers.TimedRotatingFileHandler(
-            'all.log',
-            when='midnight',
-            interval=1,
-            backupCount=3,
-            encoding='utf-8'
-        )
+    def run(self):
+        all_log_at = join(Paths.appStorageAt(), AppInfo.LOGGER_ALL_NAME)
+        all_formatter = Formatter(AppInfo.LOGGER_ALL_FMT)
+        all_handler = TimedRotatingFileHandler(all_log_at, **AppInfo.LOGGER_ALL_INI)
         all_handler.setFormatter(all_formatter)
 
-        err_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(filename)s[:%(lineno)d] - %(message)s")
-        err_handler = logging.FileHandler('error.log', 'w', encoding='utf-8')
-        err_handler.setLevel(logging.ERROR)
+        err_log_at = join(Paths.appStorageAt(), AppInfo.LOGGER_ERR_NAME)
+        err_formatter = Formatter(AppInfo.LOGGER_ERR_FMT)
+        err_handler = FileHandler(err_log_at, 'w', encoding='utf-8')
+        err_handler.setLevel(ERROR)
         err_handler.setFormatter(err_formatter)
 
         self._container.addHandler(all_handler)
@@ -48,6 +48,3 @@ class Logger:
 
     def critical(self, msg: object, *args: object):
         self._container.critical(msg, *args, exc_info=True, stack_info=True)
-
-
-gLogger = Logger('BlueStormBus')

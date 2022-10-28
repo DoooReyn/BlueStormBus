@@ -32,11 +32,8 @@ from watchdog.observers.api import ObservedWatch
 from watchdog.utils import WatchdogShutdown
 from watchdog.utils.dirsnapshot import DirectorySnapshot, DirectorySnapshotDiff
 
-from conf.service_info import ServiceInfo
-from helper.gui import Gui
-from helper.io import io
-from helper.profile import Profile
-from helper.signals import gSignals
+from conf import ServiceInfo, signals
+from helper import Gui, Profile, IO
 from view.tabs.tab_base import TabBase
 
 
@@ -87,7 +84,7 @@ class FileHandler(FileSystemEventHandler):
             self.snapshot = self.takeSnapshot()
         else:
             diff.append('暂无更新')
-        gSignals.MetaChangedInfo.emit('\n'.join(diff))
+        signals.MetaChangedInfo.emit('\n'.join(diff))
 
     def on_files_created(self, files: list):
         pass
@@ -239,9 +236,9 @@ class MetaWatchDogTab(TabBase):
         self.ui.btn_operate.clicked.connect(self.onCheckServiceState)
         self.ui.btn_sync.clicked.connect(self.onSyncManually)
         self.ui.spin_sync.valueChanged.connect(self.onSyncAfterChanged)
-        gSignals.TabCloseRequested.connect(self.onCloseRequested)
-        gSignals.ServiceForceStop.connect(self.onQuitAllowed)
-        gSignals.MetaChangedInfo.connect(self.appendLog)
+        signals.TabCloseRequested.connect(self.onCloseRequested)
+        signals.ServiceForceStop.connect(self.onQuitAllowed)
+        signals.MetaChangedInfo.connect(self.appendLog)
 
     def setupUi(self):
         last_project_at = self.profile.getLastProjectAt()
@@ -281,7 +278,7 @@ class MetaWatchDogTab(TabBase):
         project = join(where, 'project.json')
         assets = join(where, 'assets')
         if isfile(project) and isdir(assets):
-            content = io.jsonDecode(io.read(project))
+            content = IO.jsonDecode(IO.read(project))
             return content and content.get('engine') == 'cocos-creator-js', content
         return False, None
 
@@ -361,8 +358,8 @@ class MetaWatchDogTab(TabBase):
 
     def onQuitAllowed(self):
         """清理工作"""
-        gSignals.TabCloseRequested.disconnect(self.onCloseRequested)
-        gSignals.ServiceForceStop.disconnect(self.onQuitAllowed)
+        signals.TabCloseRequested.disconnect(self.onCloseRequested)
+        signals.ServiceForceStop.disconnect(self.onQuitAllowed)
         self.profile.save()
         self.stop()
         super(MetaWatchDogTab, self).onQuitAllowed()

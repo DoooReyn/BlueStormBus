@@ -9,37 +9,26 @@
 #  Description:
 
 from .app_info import AppInfo
+from .auto_increase_id import AutoIncreaseId
 from .log_info import LogLevel, LogStyle
 from .paths import Paths
 from .res_map import ResMap
 from .resources import qInitResources
-from .service_info import (
-    ServiceInfo,
-    AllService,
-    MetaWatchDogService,
-    PngCompressorService,
-    JpgCompressorService,
-    ImageSplitterService
-)
+from .service_info import *
 from .signals import Signals
 
 signals = Signals()
-services = (
-    MetaWatchDogService,
-    PngCompressorService,
-    JpgCompressorService,
-    ImageSplitterService,
-)
 
 __all__ = (
-    AllService,
-    AppInfo,
-    LogLevel,
-    LogStyle,
-    Paths,
-    ResMap,
-    ServiceInfo,
-    qInitResources,
-    services,
-    signals,
+    "AllService",
+    "AppInfo",
+    "AutoIncreaseId",
+    "LogLevel",
+    "LogStyle",
+    "Paths",
+    "ResMap",
+    "ServiceInfo",
+    "qInitResources",
+    "services",
+    "signals",
 )

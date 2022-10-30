@@ -13,9 +13,33 @@ from .log_info import LogLevel, LogStyle
 from .paths import Paths
 from .res_map import ResMap
 from .resources import qInitResources
-from .service_info import ServiceInfo
+from .service_info import (
+    ServiceInfo,
+    AllService,
+    MetaWatchDogService,
+    PngCompressorService,
+    JpgCompressorService,
+    ImageSplitterService
+)
 from .signals import Signals
 
 signals = Signals()
+services = (
+    MetaWatchDogService,
+    PngCompressorService,
+    JpgCompressorService,
+    ImageSplitterService,
+)
 
-__all__ = (AppInfo, ResMap, ServiceInfo, Paths, LogLevel, LogStyle, signals, qInitResources)
+__all__ = (
+    AllService,
+    AppInfo,
+    LogLevel,
+    LogStyle,
+    Paths,
+    ResMap,
+    ServiceInfo,
+    qInitResources,
+    services,
+    signals,
+)

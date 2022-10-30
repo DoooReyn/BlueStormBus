@@ -36,15 +36,20 @@ class Logger:
 
     def debug(self, msg: object, *args: object):
         self._container.debug(msg, *args)
+        print(msg, *args)
 
     def info(self, msg: object, *args: object):
         self._container.info(msg, *args)
+        print(msg, *args)
 
     def warn(self, msg: object, *args: object):
         self._container.warning(msg, *args)
+        print(msg, *args)
 
     def error(self, msg: object, *args: object):
         self._container.error(msg, *args, exc_info=True, stack_info=True)
+        print(msg, *args)
 
     def critical(self, msg: object, *args: object):
         self._container.critical(msg, *args, exc_info=True, stack_info=True)
+        print(msg, *args)

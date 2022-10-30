@@ -15,7 +15,7 @@ from PySide6.QtWidgets import QApplication
 
 from conf import AppInfo, Paths, ResMap, qInitResources, signals
 from helper import IO, Gui, env, logger
-from mvc.view.primary.primary_view import PrimaryView
+from mvc.view.primary_view import PrimaryView
 
 
 def notify_exception(e_type, e_value, e_traceback):

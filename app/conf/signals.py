@@ -9,6 +9,7 @@
 #  Description: 全局信号
 
 from PySide6.QtCore import QObject, Signal
+from PySide6.QtWidgets import QWidget
 
 from conf.service_info import ServiceInfo
 
@@ -16,41 +17,44 @@ from conf.service_info import ServiceInfo
 class Signals(QObject):
     """全局信号"""
 
-    ViewOpen = Signal(str)
-    ViewClose = Signal(str)
-    ViewShow = Signal(str)
-    ViewHide = Signal(str)
-    ViewEnter = Signal(str)
-    ViewExit = Signal(str)
-    ViewMove = Signal(str)
-    ViewResize = Signal(str)
-    ViewFocusIn = Signal(str)
-    ViewFocusOut = Signal(str)
+    view_open = Signal(str)
+    view_close = Signal(str)
+    view_show = Signal(str)
+    view_hide = Signal(str)
+    view_enter = Signal(str)
+    view_exit = Signal(str)
+    view_move = Signal(str)
+    view_resize = Signal(str)
+    view_focus_in = Signal(str)
+    view_focus_out = Signal(str)
 
-    LogDebug = Signal(str)
-    LogInfo = Signal(str)
-    LogWarn = Signal(str)
-    LogError = Signal(str)
+    debug = Signal(str)
+    info = Signal(str)
+    warn = Signal(str)
+    error = Signal(str)
 
-    TabOpenRequested = Signal(ServiceInfo)
-    TabCloseRequested = Signal(int, str)
-    TabCloseAllowed = Signal(int)
+    tab_open_requested = Signal(ServiceInfo)
+    tab_open_allowed = Signal(ServiceInfo)
+    tab_open_denied = Signal(ServiceInfo)
+    tab_added_requested = Signal(QWidget, str)
+    tab_close_allowed = Signal(int)
+    tab_close_denied = Signal(int)
 
-    ServiceForceStop = Signal()
-    MetaChangedInfo = Signal(str)
+    tab_force_quit = Signal()
+    meta_info_changed = Signal(str)
 
     def d(self, msg: str):
         # noinspection PyUnresolvedReferences
-        self.LogDebug.emit(msg)
+        self.debug.emit(msg)
 
     def i(self, msg: str):
         # noinspection PyUnresolvedReferences
-        self.LogInfo.emit(msg)
+        self.info.emit(msg)
 
     def w(self, msg: str):
         # noinspection PyUnresolvedReferences
-        self.LogWarn.emit(msg)
+        self.warn.emit(msg)
 
     def e(self, msg: str):
         # noinspection PyUnresolvedReferences
-        self.LogError.emit(msg)
+        self.error.emit(msg)

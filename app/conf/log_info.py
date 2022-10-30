@@ -18,7 +18,7 @@ class LogLevel(Enum):
 
 
 class LogStyle:
-    Debug = '<span style="color:#636e72;">{}</span>'
+    Debug = '<span style="color:#f4f4f4;">{}</span>'
     Info = '<span style="color:#2ecc71;">{}</span>'
     Warn = '<span style="color:#ffc312;">{}</span>'
     Error = '<span style="color:#ff3f34;">{}</span>'

@@ -3,11 +3,11 @@
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
-#  Since: 2022/10/28
+#  Since: 2022/10/29
 #  Name: base_view.py
 #  Author: DoooReyn
 #  Description:
-from PySide6.QtCore import QEvent
+from PySide6.QtCore import QEvent, Signal
 from PySide6.QtGui import (
     QResizeEvent, QCloseEvent, QEnterEvent, QFocusEvent,
     QHideEvent, QMoveEvent, QShowEvent)
@@ -16,6 +16,7 @@ from PySide6.QtWidgets import QWidget
 
 
 class BaseView(QWidget):
+    view_closed = Signal()
 
     def bringToTop(self):
         """将视图带回前台并显示"""
@@ -96,7 +97,8 @@ class BaseView(QWidget):
         pass
 
     def onClose(self):
-        pass
+        # noinspection PyUnresolvedReferences
+        self.view_closed.emit()
 
     def onSave(self):
         pass

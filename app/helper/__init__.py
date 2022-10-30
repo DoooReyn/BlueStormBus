@@ -15,6 +15,7 @@ from .gui import Gui
 from .io import IO
 from .logger import Logger
 from .profile import Profile
+from .threads import StoppableThread
 
 env = Env()
 logger = Logger()
@@ -22,9 +23,10 @@ logger = Logger()
 __all__ = (
     Decorator,
     FlowLayout,
-    Profile,
     Gui,
     IO,
+    Profile,
+    StoppableThread,
     env,
     logger
 )

@@ -7,63 +7,53 @@
 #  Name: meta_watch_dog_tab_view.py
 #  Author: DoooReyn
 #  Description:
-import threading
 from datetime import datetime
 from os import stat, listdir, rename, remove
 from os.path import join, isfile, isdir, realpath, exists
 from time import sleep
-from typing import Optional, Callable
+from typing import Optional
 
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget, QMessageBox, QMenu
 from watchdog.events import EVENT_TYPE_MOVED, FileSystemEventHandler, EVENT_TYPE_DELETED
 from watchdog.observers import Observer
-from watchdog.observers.api import ObservedWatch
 from watchdog.utils import WatchdogShutdown
 from watchdog.utils.dirsnapshot import DirectorySnapshot, DirectorySnapshotDiff
 
 from conf import MetaWatchDogService, signals
-from helper import IO, Gui
+from helper import IO, Gui, StoppableThread
 from mvc.base.base_tab_view import BaseTabView
 from mvc.controller.meta_watch_dog_tab_controller import MetaWatchDogTabController
 from mvc.model.meta_watch_dog_model import MetaWatchDogTabModel
 from mvc.ui.meta_watch_dog_tab_ui import MetaWatchDogTabUI
 
 
-class FileHandler(FileSystemEventHandler):
+class MetaFileHandler(FileSystemEventHandler):
 
-    def __init__(self, watch_path, is_recursive, feedback: Callable[[bool, str, str, Optional[str]], None]):
-        super(FileHandler, self).__init__()
-        self.watch_path = watch_path
-        self.is_recursive = is_recursive
-        self.feedback = feedback
-        self.snapshot = self.takeSnapshot()
-        self._dirty = False
+    def __init__(self, where: str, recursive: bool):
+        super(MetaFileHandler, self).__init__()
+        self._where = where
+        self._recursive = recursive
         self._operates = dict()
+        self._snapshot = self.takeSnapshot()
 
     def takeSnapshot(self):
-        return DirectorySnapshot(self.watch_path, self.is_recursive, stat, listdir)
+        return DirectorySnapshot(self._where, self._recursive, stat, listdir)
 
     def diffSnapshot(self):
         current = self.takeSnapshot()
-        diff = DirectorySnapshotDiff(self.snapshot, current, ignore_device=True)
-        self.snapshot = current
+        diff = DirectorySnapshotDiff(self._snapshot, current, ignore_device=True)
+        self._snapshot = current
         self._operates.clear()
 
         if len(diff.dirs_deleted) > 0:
             self.on_files_deleted(diff.dirs_deleted)
 
-        if len(diff.dirs_moved) > 0:
-            self.on_files_moved(diff.dirs_moved)
-
-        if len(diff.files_created) > 0:
-            self.on_files_created(diff.files_created)
-
         if len(diff.files_deleted) > 0:
             self.on_files_deleted(diff.files_deleted)
 
-        if len(diff.files_modified) > 0:
-            self.on_files_modified(diff.files_modified)
+        if len(diff.dirs_moved) > 0:
+            self.on_files_moved(diff.dirs_moved)
 
         if len(diff.files_moved) > 0:
             self.on_files_moved(diff.files_moved)
@@ -80,13 +70,10 @@ class FileHandler(FileSystemEventHandler):
                     if not exists(src[:-4]):
                         remove(src)
                         diff.append(f'[删除] {src}')
-            self.snapshot = self.takeSnapshot()
+            self._snapshot = self.takeSnapshot()
         else:
             diff.append('暂无更新')
         signals.meta_info_changed.emit('\n'.join(diff))
-
-    def on_files_created(self, files: list):
-        pass
 
     def on_files_moved(self, files: list):
         for src, dst in files:
@@ -96,9 +83,6 @@ class FileHandler(FileSystemEventHandler):
                 if exists(meta_src):
                     self._operates[meta_src] = {'operate': EVENT_TYPE_MOVED, 'dst': meta_dst}
 
-    def on_files_modified(self, files: list):
-        pass
-
     def on_files_deleted(self, files: list):
         for f in files:
             if not f.endswith('.meta'):
@@ -107,47 +91,71 @@ class FileHandler(FileSystemEventHandler):
                     self._operates[meta_src] = {'operate': EVENT_TYPE_DELETED}
 
 
-class MetaWatchDog:
-    def __init__(self, feedback: Callable[[bool, str, str, Optional[str]], None]):
-        self.dog = Observer()
-        self.feedback = feedback
-        self.watchObject: Optional[ObservedWatch] = None
-        self.handler: Optional[FileHandler] = None
+class WatchThread(StoppableThread):
+    def __init__(self, tick: int, where: str):
+        super(WatchThread, self).__init__(tick, lambda: None)
 
-    def watch(self, where: str, cycle: int):
-        def run():
-            self.handler = FileHandler(where, True, self.feedback)
-            self.watchObject = self.dog.schedule(self.handler, where, recursive=True)
-            self.dog.start()
-            try:
-                while True:
-                    sleep(cycle)
-                    self.handler.diffSnapshot()
-            except WatchdogShutdown:
-                self.handler = None
-                self.stop()
-                thread.join(30)
+        self._handler = MetaFileHandler(where, True)
+        self._dog = Observer()
+        self._observed = self._dog.schedule(self._handler, where, recursive=True)
+        self._dog.start()
 
-        thread = threading.Thread(target=run)
-        thread.daemon = True
-        thread.start()
+    def run(self):
+        print(f'线程<{id(self)}>开启')
+        try:
+            while True:
+                sleep(self._tick)
+                if self.stopped():
+                    break
+                print(f'线程<{id(self)}>执行')
+                if self._handler:
+                    self._handler.diffSnapshot()
+            print(f'线程<{id(self)}>终止')
+            self._onStop()
+        except (WatchdogShutdown, Exception) as e:
+            print('----error', e)
+            self.stop()
 
     def sync(self):
-        if self.handler is not None:
-            self.handler.diffSnapshot()
+        if self._handler is not None:
+            self._handler.diffSnapshot()
+
+    def _onStop(self):
+        if self._dog is not None:
+            self._dog.unschedule(self._observed)
+            self._dog.unschedule_all()
+            self._dog.stop()
+            self._dog.join()
+            self._handler = None
+            self._observed = None
+            self._dog = None
+
+
+class MetaWatchDoggy:
+    def __init__(self):
+        self._thread: Optional[WatchThread] = None
+
+    def watch(self, where: str, tick: int):
+        self.stop()
+
+        self._thread = WatchThread(tick, where=where)
+        self._thread.daemon = True
+        self._thread.start()
+
+    def sync(self):
+        if self._thread is not None:
+            self._thread.sync()
 
     def stop(self):
-        if self.watchObject is not None:
-            self.dog.unschedule(self.watchObject)
-            self.watchObject = None
-        self.dog.stop()
-        self.dog.join()
+        if self._thread is not None:
+            self._thread.stop()
+            self._thread = None
 
 
 class MetaWatchDogTabView(BaseTabView):
     def __init__(self, parent: QWidget = None):
         super(MetaWatchDogTabView, self).__init__(MetaWatchDogService, parent)
-        self.watch_dog = MetaWatchDog(self.onWatchFeedBack)
+        self.watch_dog = MetaWatchDoggy()
         self._ui = MetaWatchDogTabUI()
         self._ctrl = MetaWatchDogTabController(MetaWatchDogTabModel())
         self._ctrl.inited.connect(self.onInited)
@@ -191,7 +199,7 @@ class MetaWatchDogTabView(BaseTabView):
             return Gui.popup('警告', '请选择 Cocos Creator 项目目录', self, ok)
 
         super(MetaWatchDogTabView, self).run()
-        self.watch_dog.watch(self.getWatchDir(), cycle=self._ctrl.syncAfter())
+        self.watch_dog.watch(self.getWatchDir(), self._ctrl.syncAfter())
         self._ui.appendLog('Meta监听服务已启动...')
         self.onServiceStatusChanged()
 
@@ -280,3 +288,7 @@ class MetaWatchDogTabView(BaseTabView):
     def onSave(self):
         self._ctrl.save()
         super(MetaWatchDogTabView, self).onSave()
+
+    def onClose(self):
+        self.watch_dog.stop()
+        super(MetaWatchDogTabView, self).onClose()

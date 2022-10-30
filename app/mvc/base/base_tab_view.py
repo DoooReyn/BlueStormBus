@@ -66,6 +66,7 @@ class BaseTabView(BaseView):
             self.onQuitAllowed()
 
     def onQuitAllowed(self):
+        self.onClose()
         # noinspection PyUnresolvedReferences
         self.quitAllowed.emit()
 

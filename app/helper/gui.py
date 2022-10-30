@@ -18,8 +18,6 @@ from conf import Paths, AppInfo
 
 
 class Gui:
-    def __init__(self):
-        pass
 
     @staticmethod
     def app():

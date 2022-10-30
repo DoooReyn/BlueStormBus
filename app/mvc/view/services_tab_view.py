@@ -10,6 +10,7 @@
 from PySide6.QtWidgets import QWidget, QPushButton
 
 from conf import AllService, services, signals, ServiceInfo
+from helper import Gui
 from mvc.base.base_tab_view import BaseTabView
 from mvc.controller.services_tab_controller import ServicesTabController
 from mvc.model.services_tab_model import ServicesTabModel
@@ -31,7 +32,9 @@ class ServicesTabView(BaseTabView):
 
     def appendService(self, service: ServiceInfo):
         btn = QPushButton(service.title)
+        btn.setStyleSheet("QPushButton { font-family: '幼圆'; font-size: 14px; padding: 8 8 8 8px; }")
         btn.setToolTip(service.tooltip)
+        btn.setMinimumHeight(36)
         btn.clicked.connect(lambda: signals.tab_open_requested.emit(service))
         self._ui.layout_flow.addWidget(btn)
 

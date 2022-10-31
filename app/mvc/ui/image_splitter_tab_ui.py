@@ -7,8 +7,68 @@
 #  Name: image_splitter_tab_ui.py
 #  Author: DoooReyn
 #  Description:
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox
+from os.path import exists, realpath, isdir
+
+from PySide6.QtCore import Qt, QPoint, QUrl, QMimeData
+from PySide6.QtGui import QDropEvent, QAction, QDragEnterEvent
+from PySide6.QtWidgets import QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QMenu
+
+from helper import Gui
+
+
+class DroppableLineEdit(QLineEdit):
+    def __init__(self, file_or_dir: bool, *args, **kwargs):
+        super(DroppableLineEdit, self).__init__(*args, **kwargs)
+        self._file_or_dir = file_or_dir
+        self.setReadOnly(True)
+        self.setAcceptDrops(True)
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.onCustomContextMenuRequested)
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        data: QMimeData = event.mimeData()
+        where = QUrl(data.text()).toLocalFile()
+        if self._file_or_dir:
+            if exists(where) and where.lower().endswith(('.png', '.jpg', '.jpeg',)):
+                event.setAccepted(True)
+                event.acceptProposedAction()
+        else:
+            if exists(where) and isdir(where):
+                event.setAccepted(True)
+                event.acceptProposedAction()
+        super(DroppableLineEdit, self).dragEnterEvent(event)
+
+    def dropEvent(self, event: QDropEvent):
+        where = event.mimeData().text()
+        where = QUrl(where).toLocalFile()
+        self.setText(realpath(where))
+        event.accept()
+        super(DroppableLineEdit, self).dropEvent(event)
+
+    def copyAll(self):
+        self.selectAll()
+        self.copy()
+        self.deselect()
+
+    def open(self):
+        where = self.text()
+        if exists(where):
+            Gui.openExternalUrl(QUrl.fromLocalFile(where))
+
+    def onCustomContextMenuRequested(self, pos: QPoint):
+        act_copy = QAction('复制', self)
+        act_copy.setEnabled(len(self.text()) > 0)
+        act_copy.triggered.connect(self.copyAll)
+        act_open = QAction('打开', self)
+        act_open.setEnabled(len(self.text()) > 0)
+        act_open.triggered.connect(self.open)
+
+        pop_menu = QMenu()
+        pop_menu.addAction(act_copy)
+        pop_menu.addAction(act_open)
+
+        pop_menu.exec_(self.mapToGlobal(pos))
 
 
 class ImageSplitterTabUI(object):
@@ -17,8 +77,8 @@ class ImageSplitterTabUI(object):
         self.lab_output = QLabel('图像输出路径')
         self.lab_rows = QLabel('行数')
         self.lab_cols = QLabel('列数')
-        self.edit_where = QLineEdit()
-        self.edit_output = QLineEdit()
+        self.edit_where = DroppableLineEdit(file_or_dir=True)
+        self.edit_output = DroppableLineEdit(file_or_dir=False)
         self.spin_rows = QSpinBox()
         self.spin_cols = QSpinBox()
         self.btn_where = QPushButton('..')

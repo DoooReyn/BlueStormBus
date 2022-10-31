@@ -32,8 +32,9 @@ AllService = ServiceInfo('all_service', '服务列表', '服务集合')
 # ---------------------------------------- 插件 ----------------------------------------
 MetaWatchDogService = ServiceInfo('MetaWatchDog', 'Meta文件监控', 'Cocos Creator Meta 文件监控')
 # ---------------------------------------- 图片 ----------------------------------------
-PngCompressorService = ServiceInfo('PngCompressor', 'PNG压缩', 'PNG批量压缩')
-JpgCompressorService = ServiceInfo('JpgCompressor', 'JPG压缩', 'JPG批量压缩')
+PngCompressorService = ServiceInfo('PngCompressor', 'PNG压缩', 'PNG图片批量压缩')
+JpgCompressorService = ServiceInfo('JpgCompressor', 'JPG压缩', 'JPG图片批量压缩')
+ImageTinifyService = ServiceInfo('ImageTinify', 'TinyPNG图片压缩', 'TinyPNG图片压缩')
 ImageSplitterService = ServiceInfo('ImageSplitter', '图像分割', '图片分割工具')
 TextureUnpackerService = ServiceInfo('TextureUnpacker', 'TexturePacker 拆图', 'TexturePacker 图集拆图工具')
 SpineAtlasUnpackerService = ServiceInfo('SpineAtlasUnpacker', 'Spine Atlas 拆图', 'Spine骨骼动画图集拆图工具')

@@ -11,7 +11,6 @@ from PySide6.QtWidgets import QWidget, QPushButton
 
 from conf import AllService, services, signals, ServiceInfo
 from mvc.base.base_tab_view import BaseTabView
-from mvc.controller.services_tab_controller import ServicesTabController
 from mvc.model.services_tab_model import ServicesTabModel
 from mvc.ui.services_tab_ui import ServicesTabUI
 from mvc.view.image_splitter_tab_view import ImageSplitterTabView
@@ -24,9 +23,9 @@ class ServicesTabView(BaseTabView):
         super(ServicesTabView, self).__init__(AllService, parent)
 
         self._ui = ServicesTabUI()
-        self._ctrl = ServicesTabController(ServicesTabModel())
-        self._ctrl.inited.connect(self.onInited)
-        self._ctrl.sync()
+        self._model = ServicesTabModel()
+        self._model.inited.connect(self.onInited)
+        self._model.sync()
 
     def canQuit(self):
         return False
@@ -55,7 +54,7 @@ class ServicesTabView(BaseTabView):
             self.onServiceInProgress(service.title)
 
     def onClose(self):
-        self._ctrl.save()
+        self._model.save()
         super(ServicesTabView, self).onClose()
 
     @staticmethod

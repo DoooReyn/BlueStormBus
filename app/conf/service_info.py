@@ -32,14 +32,22 @@ AllService = ServiceInfo('all_service', '服务列表', '服务集合')
 # ---------------------------------------- 插件 ----------------------------------------
 MetaWatchDogService = ServiceInfo('MetaWatchDog', 'Meta文件监控', 'Cocos Creator Meta 文件监控')
 # ---------------------------------------- 图片 ----------------------------------------
+# https://pngquant.org/
 PngCompressorService = ServiceInfo('PngCompressor', 'PNG压缩', 'PNG图片批量压缩')
+# https://www.kokkonen.net/tjko/src/man/jpegoptim.txt
 JpgCompressorService = ServiceInfo('JpgCompressor', 'JPG压缩', 'JPG图片批量压缩')
+# https://tinypng.com/developers
 ImageTinifyService = ServiceInfo('ImageTinify', 'TinyPNG图片压缩', 'TinyPNG图片压缩')
+# https://pillow.readthedocs.io/en/stable/
 ImageSplitterService = ServiceInfo('ImageSplitter', '图像分割', '图片分割工具')
 TextureUnpackerService = ServiceInfo('TextureUnpacker', 'TexturePacker 拆图', 'TexturePacker 图集拆图工具')
 SpineAtlasUnpackerService = ServiceInfo('SpineAtlasUnpacker', 'Spine Atlas 拆图', 'Spine骨骼动画图集拆图工具')
 # - https://github.com/k4yt3x/video2x
 LosslessUpscalerService = ServiceInfo('LosslessUpscaler', '无损放大', '无损放大工具')
+# ---------------------------------------- 开发 ----------------------------------------
+# 代码片段
+SnippetsMasterService = ServiceInfo('SnippetsMaster', '代码片段', '代码片段管理')
+# 加、解密（md5/sha1/sha256/base64/rsa/aes/hmac）
 # ---------------------------------------- 音频 ----------------------------------------
 # - https://github.com/KrishnanSG/Audio-Compression
 AudioCompressorService = ServiceInfo('AudioCompressor', '音频压缩', '音频压缩工具')

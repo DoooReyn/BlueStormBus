@@ -18,7 +18,6 @@ from PySide6.QtWidgets import QWidget, QMenu, QListWidgetItem
 from conf import PngCompressorService, Paths
 from helper import Gui
 from mvc.base.base_tab_view import BaseTabView
-from mvc.controller.png_compressor_tab_controller import PngCompressorTabController
 from mvc.helper.compress_file_item import CompressFileItem
 from mvc.helper.compress_file_status import CompressFileStatus
 from mvc.helper.png_compress_thread import PngCompressThread
@@ -33,9 +32,9 @@ class PngCompressorTabView(BaseTabView):
         self._thread: Optional[PngCompressThread] = None
         self._files = dict()
         self._ui = PngCompressorTabUI()
-        self._ctrl = PngCompressorTabController(PngCompressorTabModel())
-        self._ctrl.inited.connect(self.onInited)
-        self._ctrl.sync()
+        self._model = PngCompressorTabModel()
+        self._model.inited.connect(self.onInited)
+        self._model.sync()
 
     def onInited(self):
         self.setupUi()
@@ -43,14 +42,14 @@ class PngCompressorTabView(BaseTabView):
 
     def setupUi(self):
         self.setLayout(self._ui.layout)
-        self._ui.slider_colors.setValue(self._ctrl.colors())
-        self._ui.spin_colors.setValue(self._ctrl.colors())
-        self._ui.slider_speed.setValue(self._ctrl.speed())
-        self._ui.spin_speed.setValue(self._ctrl.speed())
-        self._ui.slider_dithered.setValue(self._ctrl.dithering())
-        self._ui.spin_dithered.setValue(self._ctrl.dithering())
-        self._ui.check_clean.setChecked(self._ctrl.clean())
-        self._ui.edit_output.setText(self._ctrl.output())
+        self._ui.slider_colors.setValue(self._model.colors)
+        self._ui.spin_colors.setValue(self._model.colors)
+        self._ui.slider_speed.setValue(self._model.speed)
+        self._ui.spin_speed.setValue(self._model.speed)
+        self._ui.slider_dithered.setValue(self._model.dithering)
+        self._ui.spin_dithered.setValue(self._model.dithering)
+        self._ui.check_clean.setChecked(self._model.clean)
+        self._ui.edit_output.setText(self._model.output)
 
     def setupSignals(self):
         self._ui.slider_colors.valueChanged.connect(self.onColorsValueChanged1)
@@ -165,55 +164,55 @@ class PngCompressorTabView(BaseTabView):
             [self.appendFileListItem(dirname(f), f) for f in files]
 
     def onSelectOutputDir(self):
-        where = Gui.pickDirectory('选取输出目录', self._ctrl.output(), self)
+        where = Gui.pickDirectory('选取输出目录', self._model.output(), self)
         if where and isdir(where):
             where = Paths.toLocalFile(where)
             self._ui.edit_output.setText(where)
-            self._ctrl.setOutput(where)
+            self._model.output = where
 
     def onColorsValueChanged1(self):
         value = self._ui.slider_colors.value()
         self._ui.spin_colors.setValue(value)
-        self._ctrl.setColors(value)
+        self._model.colors = value
 
     def onColorsValueChanged2(self):
         value = self._ui.spin_colors.value()
         self._ui.slider_colors.setValue(value)
-        self._ctrl.setColors(value)
+        self._model.colors = value
 
     def onSpeedValueChanged1(self):
         value = self._ui.slider_speed.value()
         self._ui.spin_speed.setValue(value)
-        self._ctrl.setSpeed(value)
+        self._model.speed = value
 
     def onSpeedValueChanged2(self):
         value = self._ui.spin_speed.value()
         self._ui.slider_speed.setValue(value)
-        self._ctrl.setSpeed(value)
+        self._model.speed = value
 
     def onDitheringValueChanged1(self):
         value = self._ui.slider_dithered.value()
         self._ui.spin_dithered.setValue(value)
-        self._ctrl.setDithering(value)
+        self._model.dithering = value
 
     def onDitheringValueChanged2(self):
         value = self._ui.spin_dithered.value()
         self._ui.slider_dithered.setValue(value)
-        self._ctrl.setDithering(value)
+        self._model.dithering = value
 
     def onCleanStateChanged(self):
         checked = self._ui.check_clean.isChecked()
-        self._ctrl.setClean(checked)
+        self._model.clean = checked
 
     def canQuit(self):
         return not self.running
 
     def onSave(self):
-        self._ctrl.save()
+        self._model.save()
         super(PngCompressorTabView, self).onSave()
 
     def run(self):
-        if not self._ctrl.output():
+        if not self._model.output():
             return Gui.popup('提示', '未选取输出目录', parent=self)
 
         if self._ui.list_files.count() <= 0:
@@ -222,11 +221,11 @@ class PngCompressorTabView(BaseTabView):
         super(PngCompressorTabView, self).run()
         self._ui.setStatefulWidgetsEnabled(False)
         self._thread = PngCompressThread(0.1,
-                                         self._ctrl.output(),
-                                         self._ctrl.clean(),
-                                         self._ctrl.colors(),
-                                         self._ctrl.speed(),
-                                         self._ctrl.dithering(),
+                                         self._model.output(),
+                                         self._model.clean(),
+                                         self._model.colors(),
+                                         self._model.speed(),
+                                         self._model.dithering(),
                                          self.getAllListFileItems(),
                                          on_complete=self.stop)
         self._thread.daemon = True

@@ -93,7 +93,7 @@ class PrimaryView(QMainWindow, BaseView):
             getattr(widget, 'quitAllowed').connect(lambda: self.onTabCloseAllowed(index))
 
     def onAppendLog(self, kind: LogLevel, msg: str):
-        self.appendFmtLog(LogLevel.Debug, strftime("[%Y-%m-%d %H:%M:%S]", localtime()))
+        self.appendFmtLog(LogLevel.Void, strftime("[%Y-%m-%d %H:%M:%S]", localtime()))
         for sec in msg.split('\n'):
             self.appendFmtLog(kind, sec)
 

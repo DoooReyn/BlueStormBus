@@ -20,7 +20,7 @@ class PngCompressorTabModel(BaseModel):
         self._speed = 4
         self._dithering = 0.5
         self._output = ''
-        self._override = True
+        self._clean = True
 
     @property
     def output(self):
@@ -31,12 +31,12 @@ class PngCompressorTabModel(BaseModel):
         self._output = at
 
     @property
-    def override(self):
-        return self._override
+    def clean(self):
+        return self._clean
 
-    @override.setter
-    def override(self, override: bool):
-        self._override = override
+    @clean.setter
+    def clean(self, override: bool):
+        self._clean = override
 
     @property
     def colors(self):
@@ -69,5 +69,5 @@ class PngCompressorTabModel(BaseModel):
             speed=self._speed,
             dithering=self._dithering,
             output=self._output,
-            override=self._override
+            clean=self._clean
         )

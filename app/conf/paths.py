@@ -10,12 +10,24 @@
 from os.path import join
 from typing import Sequence
 
-from PySide6.QtCore import QStandardPaths
+from PySide6.QtCore import QStandardPaths, QDir, QUrl
 
 from conf import AppInfo
 
 
 class Paths:
+
+    @staticmethod
+    def applicationAt(debug: bool = True):
+        current = QDir.currentPath()
+        current = join(current, '..') if debug else current
+        return Paths.toLocalFile(current)
+
+    @staticmethod
+    def pngquantAt(debug: bool = True):
+        app_at = Paths.applicationAt(debug)
+        current = join(app_at, 'thirds', 'pngquant.exe')
+        return Paths.toLocalFile(current)
 
     @staticmethod
     def pictureAt():
@@ -33,8 +45,16 @@ class Paths:
     @staticmethod
     def appStorageAt():
         """应用缓存路径"""
-        return join(Paths.localCacheAt(), AppInfo.APP_NAME)
+        return Paths.toLocalFile(join(Paths.localCacheAt(), AppInfo.APP_NAME))
 
     @staticmethod
     def concat(start: str, paths: Sequence[str]):
-        return join(start, *paths)
+        return Paths.toLocalFile(join(start, *paths))
+
+    @staticmethod
+    def toLocalFile(filepath: str):
+        return QUrl.fromLocalFile(filepath).toLocalFile()
+
+    @staticmethod
+    def fromLocalFile(filepath: str):
+        return QUrl.fromLocalFile(filepath)

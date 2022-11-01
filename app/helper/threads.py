@@ -14,7 +14,7 @@ from typing import Callable
 
 
 class StoppableThread(Thread):
-    def __init__(self, tick: int, fn: Callable = lambda: None, *args, **kwargs):
+    def __init__(self, tick: float, fn: Callable = lambda: None, *args, **kwargs):
         super(StoppableThread, self).__init__(*args, **kwargs)
 
         self._tick = tick

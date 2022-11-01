@@ -69,6 +69,8 @@ XinHuaZiDianService = ServiceInfo('XinHuaZiDian', '新华字典', '📙 中华�
 PinyinService = ServiceInfo('Pinyin', '汉字转拼音', '汉字转拼音')
 # - 壁纸
 UnsplashWallpaperService = ServiceInfo('UnsplashWallpaper', 'Unsplash 随机壁纸', 'Unsplash 随机壁纸')
+# - 闹钟
+AlarmClockService = ServiceInfo('AlarmClock', '闹钟', '自定义闹钟')
 
 # 导出接口
 services = (
@@ -92,30 +94,5 @@ services = (
     XinHuaZiDianService,
     PinyinService,
     UnsplashWallpaperService,
-)
-
-__all__ = (
-    "services",
-    "ServiceInfo",
-    "AllService",
-    "MetaWatchDogService",
-    "PngCompressorService",
-    "JpgCompressorService",
-    "ImageSplitterService",
-    "TextureUnpackerService",
-    "SpineAtlasUnpackerService",
-    "LosslessUpscalerService",
-    "AudioConverterService",
-    "AudioCompressorService",
-    "PasswordMasterService",
-    "BilibiliAnimateService",
-    "BilibiliDownloaderService",
-    "SubtitleTranslatorService",
-    "QrcodeService",
-    "LANTransmitService",
-    "Text2SpeechService",
-    "OcrTranslatorService",
-    "XinHuaZiDianService",
-    "PinyinService",
-    "UnsplashWallpaperService",
+    AlarmClockService,
 )

@@ -99,4 +99,4 @@ class Gui:
         start = start if len(start) > 0 else Paths.documentAt()
         chosen = QFileDialog.getExistingDirectory(parent, title, start)
         if isdir(chosen):
-            return chosen
+            return Paths.toLocalFile(chosen)

@@ -10,9 +10,10 @@
 
 from json import loads, dumps, JSONDecodeError
 from os import makedirs
+from os.path import dirname, isfile
 from typing import List, Union, Dict
 
-from PySide6.QtCore import QIODevice, QFile
+from PySide6.QtCore import QIODevice, QFile, QFileInfo
 
 
 class IO:
@@ -21,6 +22,7 @@ class IO:
     @staticmethod
     def mkdir(directory: str):
         """创建目录"""
+        directory = dirname(directory)
         makedirs(directory, exist_ok=True)
 
     @staticmethod
@@ -48,3 +50,29 @@ class IO:
     def jsonEncode(content: Union[Dict, List]):
         """json编码"""
         return dumps(content, ensure_ascii=False, indent=2)
+
+    @staticmethod
+    def bytesToUnit(n: int):
+        symbols = ('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
+        prefix = {}
+        for i, s in enumerate(symbols):
+            prefix[s] = 1 << (i + 1) * 10
+        for s in reversed(symbols):
+            if n >= prefix[s]:
+                value = float(n) / prefix[s]
+                return '%.1f%s' % (value, s)
+        return f'{n}B'
+
+    @staticmethod
+    def getFileSize(filepath: str):
+        if isfile(filepath):
+            info = QFileInfo(filepath)
+            return info.size()
+        return -1
+
+    @staticmethod
+    def getFileSizeInUnit(filepath: str):
+        size = IO.getFileSize(filepath)
+        if size > -1:
+            return IO.bytesToUnit(size)
+        return '--'

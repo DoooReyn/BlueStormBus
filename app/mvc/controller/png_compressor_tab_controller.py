@@ -23,11 +23,11 @@ class PngCompressorTabController(BaseController):
     def setOutput(self, at: str):
         self.model.output = at
 
-    def override(self):
-        return self.model.override
+    def clean(self):
+        return self.model.clean
 
-    def setOverride(self, override: bool):
-        self.model.override = override
+    def setClean(self, clean: bool):
+        self.model.clean = clean
 
     def colors(self):
         return self.model.colors

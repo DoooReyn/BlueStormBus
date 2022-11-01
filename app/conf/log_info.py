@@ -11,6 +11,7 @@ from enum import Enum
 
 
 class LogLevel(Enum):
+    Void = 0
     Debug = 1
     Info = 2
     Warn = 3
@@ -18,6 +19,7 @@ class LogLevel(Enum):
 
 
 class LogStyle:
+    Void = '<span style="color:#d5d5d5;">{}</span>'
     Debug = '<span style="color:#f4f4f4;">{}</span>'
     Info = '<span style="color:#2ecc71;">{}</span>'
     Warn = '<span style="color:#ffc312;">{}</span>'

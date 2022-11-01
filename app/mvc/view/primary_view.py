@@ -16,7 +16,6 @@ from PySide6.QtWidgets import QWidget, QMainWindow, QMenu, QTabBar
 from conf import AppInfo, ResMap, LogLevel, LogStyle, signals, ServiceInfo, AllService
 from helper import Gui, logger
 from mvc.base.base_view import BaseView
-from mvc.controller.primary_controller import PrimaryController
 from mvc.model.primary_model import PrimaryModel
 from mvc.ui.primary_ui import PrimaryUI
 from mvc.view.services_tab_view import ServicesTabView
@@ -27,16 +26,16 @@ class PrimaryView(QMainWindow, BaseView):
         super(PrimaryView, self).__init__(parent)
 
         self._ui = PrimaryUI()
-        self._ctrl = PrimaryController(PrimaryModel())
-        self._ctrl.inited.connect(self.onInited)
-        self._ctrl.sync()
+        self._model = PrimaryModel()
+        self._model.inited.connect(self.onInited)
+        self._model.sync()
 
     def onInited(self):
         self.setWindowTitle(AppInfo.APP_DISPLAY_NAME)
         self.setWindowIcon(Gui.icon(ResMap.ICON_APP))
         self.setCentralWidget(self._ui.content)
-        self.setMinimumSize(*self._ctrl.miniumSize())
-        self.setGeometry(self._ctrl.geometry())
+        self.setMinimumSize(*self._model.miniumSize)
+        self.setGeometry(self._model.geometry)
         self._ui.service_tabs.tabCloseRequested.connect(self.onTabCloseRequested)
         self._ui.edit_log.customContextMenuRequested.connect(self.onLogContextMenuRequested)
         signals.debug.connect(lambda msg: self.onAppendLog(LogLevel.Debug, msg))
@@ -99,8 +98,8 @@ class PrimaryView(QMainWindow, BaseView):
 
     def onSave(self):
         if not (self.isFullScreen() or self.isMinimized() or self.isFullScreen()):
-            self._ctrl.syncGeometry(self.geometry())
-        self._ctrl.save()
+            self._model.geometry = self.geometry()
+        self._model.save()
         super(PrimaryView, self).onSave()
 
     def onClose(self):

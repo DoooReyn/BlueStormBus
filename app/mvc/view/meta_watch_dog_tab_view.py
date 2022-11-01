@@ -102,11 +102,13 @@ class MetaWatchDogTabView(BaseTabView):
         if self.running:
             self._ui.btn_sync.setEnabled(True)
             self._ui.spin_sync.setEnabled(False)
+            self._ui.btn_open.setEnabled(False)
             self._ui.btn_operate.setChecked(True)
             self._ui.btn_operate.setText('停止服务')
         else:
             self._ui.btn_sync.setEnabled(False)
             self._ui.spin_sync.setEnabled(True)
+            self._ui.btn_open.setEnabled(True)
             self._ui.btn_operate.setChecked(False)
             self._ui.btn_operate.setText('启动服务')
 

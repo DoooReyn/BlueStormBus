@@ -25,3 +25,7 @@ class Env:
 
     def isDebug(self):
         return self._debug
+
+    def dump(self, *args, **kwargs):
+        if self.isDebug():
+            print(*args, **kwargs)

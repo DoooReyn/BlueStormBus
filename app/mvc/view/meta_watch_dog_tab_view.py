@@ -23,7 +23,6 @@ from watchdog.utils.dirsnapshot import DirectorySnapshot, DirectorySnapshotDiff
 from conf import MetaWatchDogService, signals
 from helper import IO, Gui, StoppableThread
 from mvc.base.base_tab_view import BaseTabView
-from mvc.controller.meta_watch_dog_tab_controller import MetaWatchDogTabController
 from mvc.model.meta_watch_dog_model import MetaWatchDogTabModel
 from mvc.ui.meta_watch_dog_tab_ui import MetaWatchDogTabUI
 
@@ -157,9 +156,9 @@ class MetaWatchDogTabView(BaseTabView):
         super(MetaWatchDogTabView, self).__init__(MetaWatchDogService, parent)
         self.watch_dog = MetaWatchDoggy()
         self._ui = MetaWatchDogTabUI()
-        self._ctrl = MetaWatchDogTabController(MetaWatchDogTabModel())
-        self._ctrl.inited.connect(self.onInited)
-        self._ctrl.sync()
+        self._model = MetaWatchDogTabModel()
+        self._model.inited.connect(self.onInited)
+        self._model.sync()
 
     def cleanupSignals(self):
         signals.meta_info_changed.disconnect(self._ui.appendLog)
@@ -199,7 +198,7 @@ class MetaWatchDogTabView(BaseTabView):
             return Gui.popup('警告', '请选择 Cocos Creator 项目目录', self, ok)
 
         super(MetaWatchDogTabView, self).run()
-        self.watch_dog.watch(self.getWatchDir(), self._ctrl.syncAfter())
+        self.watch_dog.watch(self.getWatchDir(), self._model.syncAfter)
         self._ui.appendLog('Meta监听服务已启动...')
         self.onServiceStatusChanged()
 
@@ -215,8 +214,8 @@ class MetaWatchDogTabView(BaseTabView):
     def onInited(self):
         self.setLayout(self._ui.layout)
         self._ui.edit_help.setText(self.service.tooltip)
-        self._ui.edit_where.setText(self._ctrl.lastProjectAt())
-        self._ui.spin_sync.setValue(self._ctrl.syncAfter())
+        self._ui.edit_where.setText(self._model.lastProjectAt)
+        self._ui.spin_sync.setValue(self._model.syncAfter)
         self.onServiceStatusChanged()
         self._ui.edit_where.textChanged.connect(self.onLastProjectAtChanged)
         self._ui.spin_sync.valueChanged.connect(self.onSyncAfterValueChanged)
@@ -241,7 +240,7 @@ class MetaWatchDogTabView(BaseTabView):
             self._ui.btn_operate.setText('启动服务')
 
     def onBrowserProjectPath(self):
-        where = Gui.pickDirectory('选择 Cocos Creator 项目目录', self._ctrl.lastProjectAt(), self)
+        where = Gui.pickDirectory('选择 Cocos Creator 项目目录', self._model.lastProjectAt, self)
         self.checkProjectPath(where)
 
     def onWatchFeedBack(self, is_directory: bool, event_type: str, src_path: str, dest_path: Optional[str]):
@@ -280,13 +279,13 @@ class MetaWatchDogTabView(BaseTabView):
         pop_menu.exec_(self._ui.edit_log.mapToGlobal(pos))
 
     def onLastProjectAtChanged(self):
-        self._ctrl.lastProjectAtValueChanged.emit(self._ui.edit_where.text())
+        self._model.lastProjectAt = self._ui.edit_where.text()
 
     def onSyncAfterValueChanged(self):
-        self._ctrl.syncAfterValueChanged.emit(self._ui.spin_sync.value())
+        self._model.syncAfter = self._ui.spin_sync.value()
 
     def onSave(self):
-        self._ctrl.save()
+        self._model.save()
         super(MetaWatchDogTabView, self).onSave()
 
     def onClose(self):

@@ -18,7 +18,6 @@ from PySide6.QtWidgets import QWidget
 from conf import ImageSplitterService
 from helper import Gui
 from mvc.base.base_tab_view import BaseTabView
-from mvc.controller.image_splitter_tab_controller import ImageSplitterTabController
 from mvc.model.image_splitter_tab_model import ImageSplitterTabModel
 from mvc.ui.image_splitter_tab_ui import ImageSplitterTabUI
 
@@ -28,17 +27,17 @@ class ImageSplitterTabView(BaseTabView):
         super(ImageSplitterTabView, self).__init__(ImageSplitterService, parent)
 
         self._ui = ImageSplitterTabUI()
-        self._ctrl = ImageSplitterTabController(ImageSplitterTabModel())
-        self._ctrl.inited.connect(self.onInited)
-        self._ctrl.sync()
+        self._model = ImageSplitterTabModel()
+        self._model.inited.connect(self.onInited)
+        self._model.sync()
 
     def canQuit(self):
         return True
 
     def onInited(self):
         self.setLayout(self._ui.layout)
-        self._ui.edit_where.setText(self._ctrl.imageSrcAt())
-        self._ui.edit_output.setText(self._ctrl.imageDstAt())
+        self._ui.edit_where.setText(self._model.imageSrcAt)
+        self._ui.edit_output.setText(self._model.imageDstAt)
         self._ui.spin_rows.setValue(1)
         self._ui.spin_cols.setValue(1)
         self._ui.edit_where.textChanged.connect(self.onSrcChanged)
@@ -48,20 +47,20 @@ class ImageSplitterTabView(BaseTabView):
         self._ui.btn_generate.clicked.connect(self.onGenerate)
 
     def onPickSrcAt(self):
-        wheres = Gui.pickFiles('选择图片', self._ctrl.imageSrcAt(), '图片(*.png *.jpg *.jpeg)', parent=self)
+        wheres = Gui.pickFiles('选择图片', self._model.imageSrcAt, '图片(*.png *.jpg *.jpeg)', parent=self)
         if len(wheres) > 0 and isfile(wheres[0]):
             self._ui.edit_where.setText(wheres[0])
 
     def onPickDstAt(self):
-        where = Gui.pickDirectory('选择图片输出位置', self._ctrl.imageDstAt(), self)
+        where = Gui.pickDirectory('选择图片输出位置', self._model.imageDstAt, self)
         if isdir(where):
             self._ui.edit_output.setText(where)
 
     def onSrcChanged(self):
-        self._ctrl.setImageSrcAt(self._ui.edit_where.text())
+        self._model.imageSrcAt = self._ui.edit_where.text()
 
     def onDstChanged(self):
-        self._ctrl.setImageDstAt(self._ui.edit_output.text())
+        self._model.imageDstAt = self._ui.edit_output.text()
 
     def onGenerate(self):
         where = self._ui.edit_where.text()
@@ -110,4 +109,4 @@ class ImageSplitterTabView(BaseTabView):
                   lambda: None)
 
     def onSave(self):
-        self._ctrl.save()
+        self._model.save()

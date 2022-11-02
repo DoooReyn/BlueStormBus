@@ -30,6 +30,12 @@ class Paths:
         return Paths.toLocalFile(current)
 
     @staticmethod
+    def jpegoptimAt(debug: bool = True):
+        app_at = Paths.applicationAt(debug)
+        current = join(app_at, 'thirds', 'jpegoptim.exe')
+        return Paths.toLocalFile(current)
+
+    @staticmethod
     def pictureAt():
         return QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
 

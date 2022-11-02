@@ -3,10 +3,11 @@
 #  Copyright 2020-2022 DoooReyn. All rights reserved.
 #  Licensed under the MIT License.
 #
-#  Since: 2022/11/1
-#  Name: png_compress_thread.py
+#  Since: 2022/11/2
+#  Name: jpg_compress_thread.py
 #  Author: DoooReyn
 #  Description:
+from os.path import dirname, realpath, abspath
 from shutil import rmtree
 from subprocess import Popen, STDOUT, PIPE
 from time import sleep
@@ -18,25 +19,23 @@ from helper import StoppableThread, env, IO
 from mvc.helper.compress_file_item import CompressFileItem
 
 
-class PngCompressThread(StoppableThread):
+class JpgCompressThread(StoppableThread):
     def __init__(self,
                  tick: float,
                  output: str,
                  clean: bool,
-                 colors: int,
-                 speed: int,
-                 dithering: int,
+                 strip: bool,
+                 quality: int,
                  files: List[CompressFileItem],
                  on_complete: Callable,
                  *args,
                  **kwargs):
-        super(PngCompressThread, self).__init__(tick, *args, **kwargs)
+        super(JpgCompressThread, self).__init__(tick, *args, **kwargs)
 
         self._output = output
         self._clean = clean
-        self._colors = colors
-        self._speed = speed
-        self._dithering = dithering
+        self._strip = strip
+        self._quality = quality
         self._files = files
         self._current = 0
         self._on_complete = on_complete
@@ -44,30 +43,35 @@ class PngCompressThread(StoppableThread):
     def _fmtCmd(self, task: CompressFileItem):
         dst = task.replaceDstAtByDir(self._output)
         IO.mkdir(dst)
-        return [Paths.pngquantAt(env.isDebug()),
-                str(self._colors),
-                task.src_at,
-                f'--speed={self._speed}',
-                f'--floyd={self._dithering / 10.0}',
-                '--strip',
+        return [Paths.jpegoptimAt(env.isDebug()),
+                '-d',
+                dirname(dst),
+                '-m',
+                f'{self._quality}',
+                '' if self._strip else '--strip-all',
+                '-o',
                 '-v',
                 '-f',
-                '-o',
-                dst
+                '--all-progressive',
+                abspath(task.src_at),
                 ]
 
     @staticmethod
     def _openCmd(cmd: List[str]):
         process = Popen(cmd, shell=True, bufsize=0, stdout=PIPE, stderr=STDOUT,
-                        encoding='utf-8', universal_newlines=True)
+                        universal_newlines=True)
         msg = []
         while True:
-            output = process.stdout.readline()
-            if output is not None:
-                output = output.strip()
-                if output:
-                    msg.append(output)
-            if not output and process.poll() is not None:
+            try:
+                output = process.stdout.readline()
+                if output is not None:
+                    output = output.strip()
+                    if output:
+                        msg.append(output)
+                if not output and process.poll() is not None:
+                    break
+            except UnicodeDecodeError:
+                signals.error.emit('\n'.join(format_exc()))
                 break
         return msg
 

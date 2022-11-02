@@ -14,6 +14,7 @@ from mvc.base.base_tab_view import BaseTabView
 from mvc.model.services_tab_model import ServicesTabModel
 from mvc.ui.services_tab_ui import ServicesTabUI
 from mvc.view.image_splitter_tab_view import ImageSplitterTabView
+from mvc.view.jpg_compressor_tab_view import JpgCompressorTabView
 from mvc.view.meta_watch_dog_tab_view import MetaWatchDogTabView
 from mvc.view.png_compressor_tab_view import PngCompressorTabView
 
@@ -76,3 +77,7 @@ class ServicesTabView(BaseTabView):
     @staticmethod
     def onPngCompressor():
         return PngCompressorTabView()
+
+    @staticmethod
+    def onJpgCompressor():
+        return JpgCompressorTabView()

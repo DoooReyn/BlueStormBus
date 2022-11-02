@@ -22,6 +22,7 @@ class CompressFileItem(QWidget):
         self._lab_file = QLabel(self._file_status.src_at)
         self._lab_size_src = QLabel("--")
         self._lab_size_dst = QLabel("--")
+        self._lab_size_dst.setStyleSheet("QLabel { color: #3271ae; }")
         self._layout = QGridLayout()
         self._layout.addWidget(self._lab_file, 0, 0, 1, 1)
         self._layout.addWidget(self._lab_size_src, 0, 1, 1, 1)

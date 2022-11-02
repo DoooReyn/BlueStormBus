@@ -19,7 +19,7 @@ class BaseViewModel(BaseModel):
         super(BaseViewModel, self).__init__()
 
         self.identifier = 'base_view_model'
-        self._minium_size = [640, 480]
+        self._minium_size = [734, 480]
         self._geometry = Gui.rectAsList(Gui.centralGeometryOfScreen(*self._minium_size))
 
     def format(self):

@@ -9,10 +9,22 @@
 #  Description:
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QRegularExpressionValidator
-from PySide6.QtWidgets import QLabel, QLineEdit, QVBoxLayout, QSpinBox, QPushButton, QTableWidget, QGridLayout, \
-    QWidget
+from PySide6.QtWidgets import QLabel, QLineEdit, QVBoxLayout, QSpinBox, QPushButton, QGridLayout, \
+    QWidget, QHeaderView, QTableWidget, QAbstractItemView
 
 from mvc.helper.password_generator import PasswordGenerator
+
+HEADER_STYLE = """
+QHeaderView::section {
+    spacing: 10px;
+    border: 1px solid #ebebeb;
+    margin: 1px;
+}
+QHeaderView::section::title {
+    font: bold;
+    text-align: center;
+}
+"""
 
 
 class PasswordMasterTabUI(object):
@@ -64,6 +76,8 @@ class PasswordMasterTabUI(object):
         self.spin_special.setRange(0, 25)
         self.lab_create_comment = QLabel('备注')
         self.edit_create_comment = QLineEdit('')
+        self.lab_create_account = QLabel('账户')
+        self.edit_create_account = QLineEdit('')
         self.lab_create_password = QLabel('密码')
         self.edit_create_password = QLineEdit('')
         self.edit_create_password.setReadOnly(True)
@@ -71,8 +85,16 @@ class PasswordMasterTabUI(object):
         self.btn_create_password = QPushButton('生成')
         self.btn_copy_password = QPushButton('复制')
         self.btn_add_password = QPushButton('保存')
-        self.lab_passwords = QLabel('密码本')
+        self.btn_import = QPushButton('导入')
         self.tbl_passwords = QTableWidget()
+        self.tbl_passwords.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.tbl_passwords.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
+        self.tbl_passwords.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.tbl_passwords.setHorizontalHeaderLabels(['账户', '备注', '密码'])
+        self.tbl_passwords.horizontalHeader().setStretchLastSection(True)
+        self.tbl_passwords.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.tbl_passwords.horizontalHeader().setStyleSheet(HEADER_STYLE)
+        self.tbl_passwords.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.layout_main_password = QGridLayout()
         self.layout_main_password.addWidget(self.lab_lower, 0, 0, 1, 1)
         self.layout_main_password.addWidget(self.spin_lower, 0, 1, 1, 1)
@@ -87,9 +109,11 @@ class PasswordMasterTabUI(object):
         self.layout_main_password.addWidget(self.btn_create_password, 1, 9, 1, 1)
         self.layout_main_password.addWidget(self.btn_copy_password, 1, 10, 1, 1)
         self.layout_main_password.addWidget(self.btn_add_password, 1, 11, 1, 1)
-        self.layout_main_password.addWidget(self.lab_create_comment, 2, 0, 1, 1)
-        self.layout_main_password.addWidget(self.edit_create_comment, 2, 1, 1, 11)
-        self.layout_main_password.addWidget(self.lab_passwords, 3, 0, 1, 1)
+        self.layout_main_password.addWidget(self.lab_create_account, 2, 0, 1, 1)
+        self.layout_main_password.addWidget(self.edit_create_account, 2, 1, 1, 11)
+        self.layout_main_password.addWidget(self.lab_create_comment, 3, 0, 1, 1)
+        self.layout_main_password.addWidget(self.edit_create_comment, 3, 1, 1, 11)
+        self.layout_main_password.addWidget(self.btn_import, 0, 11, 1, 1)
         self.layout_main_password.addWidget(self.tbl_passwords, 4, 0, 1, 12)
         self.panel_main_password.setLayout(self.layout_main_password)
         self.layout_main_password.setColumnStretch(8, 1)
@@ -112,6 +136,14 @@ class PasswordMasterTabUI(object):
     def showMainPasswordPanel(self):
         self.showPanel(PasswordMasterTabUI.Panels.MainPassword)
 
+    def clearnEdits(self):
+        self.edit_input_password.clear()
+        self.edit_check_password.clear()
+        self.edit_create_account.clear()
+        self.edit_create_password.clear()
+        self.edit_create_comment.clear()
+
     def showPanel(self, panel_code: int):
+        self.clearnEdits()
         for index, panel in enumerate(self.panels):
             panel.setVisible(panel_code == index)

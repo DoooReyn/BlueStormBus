@@ -14,7 +14,7 @@ class PasswordGenerator:
     upper_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     lower_letters = 'abcdefghijklmnopqrstuvwxyz'
     numbers = '0123456789'
-    specials = ',./!@?-_'
+    specials = '._-!@?'
 
     @staticmethod
     def generateAllInLength(length, upper=True, lower=True, number=True, special=False):

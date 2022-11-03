@@ -47,7 +47,7 @@ class PasswordMasterTabModel(BaseModel):
         self._master = ""
         self._public = ""
         self._private = ""
-        self._passwords = dict()
+        self._passwords = []
         self._inited = False
         self.inited.connect(self._onInited)
 
@@ -66,41 +66,40 @@ class PasswordMasterTabModel(BaseModel):
             if self._public:
                 self._public = Decoder.base64(self._public)
                 self._private = Decoder.base64(self._private)
-                print('----------------')
             else:
                 public, private = newkeys(1024)
                 self._public = public.save_pkcs1().decode()
                 self._private = private.save_pkcs1().decode()
-                print('================')
-            print("public", self._public)
-            print("private", self._private)
             self.save()
 
     def passwords(self):
         return self._passwords
 
-    def hasPassword(self, comment: str):
-        comment = Encoder.base64(comment)
-        return self._passwords.get(comment, None) is not None
+    def restore(self, account: str, comment: str, password: str):
+        return Decoder.base64(account), Decoder.base64(comment), Decoder.rsa(password, self._private)
 
-    def getPassword(self, comment: str):
-        comment = Encoder.base64(comment)
-        password = self._passwords.get(comment, None)
-        if password:
-            return Decoder.rsa(password, self._private)
+    def set(self, row: int, account: str, comment: str, password: str):
+        if row < len(self._passwords):
+            a = Encoder.base64(account)
+            c = Encoder.base64(comment)
+            p = Encoder.rsa(password, self._public)
+            self._passwords[row] = (c, p,)
+            self.save()
 
-    def setPassword(self, comment: str, password: str):
-        comment = Encoder.base64(comment)
-        if self._passwords.get(comment, None):
-            self._passwords[comment] = Encoder.rsa(password, self._public)
+    def add(self, account: str, comment: str, password: str):
+        a = Encoder.base64(account)
+        c = Encoder.base64(comment)
+        p = Encoder.rsa(password, self._public)
+        self._passwords.append((a, c, p,))
+        self.save()
 
-    def addPassword(self, comment: str, password: str):
-        comment = Encoder.base64(comment)
-        self._passwords[comment] = Encoder.rsa(password, self._public)
+    def remove(self, row: int):
+        if row < len(self._passwords):
+            del self._passwords[row]
+            self.save()
 
-    def delPassword(self, comment: str):
-        comment = Encoder.base64(comment)
-        del self._passwords[comment]
+    def arrange(self):
+        self._passwords.sort(key=lambda e: e[0])
 
     def format(self):
         return {
